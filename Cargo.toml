@@ -1,0 +1,13 @@
+[package]
+name = "rustls-native-certs"
+version = "0.1.0"
+authors = ["Joseph Birr-Pixton <jpixton@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+rustls = "0.15.2"
+
+[target.'cfg(windows)'.dependencies]
+
+[target.'cfg(target_os = "linux")'.dependencies]
+openssl-probe = "0.1.2"
