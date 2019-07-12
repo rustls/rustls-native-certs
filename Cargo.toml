@@ -7,6 +7,9 @@ edition = "2018"
 [dependencies]
 rustls = "0.15.2"
 
+[dev-dependencies]
+webpki = "0.19"
+
 [target.'cfg(windows)'.dependencies]
 
 [target.'cfg(target_os = "linux")'.dependencies]
