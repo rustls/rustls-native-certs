@@ -30,8 +30,16 @@ pub fn load_native_certs() -> Result<RootCertStore, Error> {
 
         for cert in iter {
             let der = cert.to_der();
+
+            // If there are no specific trust settings, the default
+            // is to trust the certificate as a root cert.  Weird API but OK.
+            // The docs say:
+            //
+            // "Note that an empty Trust Settings array means "always trust this cert,
+            //  with a resulting kSecTrustSettingsResult of kSecTrustSettingsResultTrustRoot".
             let trusted = ts.tls_trust_settings_for_certificate(&cert)
-                .map_err(|err| Error::new(ErrorKind::Other, err))?;
+                .map_err(|err| Error::new(ErrorKind::Other, err))?
+                .unwrap_or(TrustSettingsForCertificate::TrustRoot);
 
             all_certs.entry(der)
                 .or_insert(trusted);
