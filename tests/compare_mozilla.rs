@@ -110,7 +110,11 @@ fn test_contains_most_roots_known_by_mozilla() {
         }
     }
 
+    #[cfg(windows)]
+    let threshold = 0.95; // no more than 95% extra roots; windows misses *many* roots
+    #[cfg(not(windows))]
     let threshold = 0.5; // no more than 50% extra roots
+
     let diff = (missing_in_native_roots as f64) / (mozilla.len() as f64);
     println!("mozilla: {:?}", mozilla.len());
     println!("native: {:?}", native.len());
