@@ -36,13 +36,13 @@ This library exposes a single function with this signature:
 pub fn load_native_certs() -> Result<rustls::RootCertStore, std::io::Error>
 ```
 
-On success, this returns a `rustls::RootCertStore` loaded with a snapshop of the
-root certificates found on this platform.  This function fails in a platform-specific
-way, expressed in a `std::io::Error`.
+On success, this returns a `rustls::RootCertStore` loaded with a
+snapshop of the root certificates found on this platform.  This
+function fails in a platform-specific way, expressed in a `std::io::Error`.
 
-This function can be expensive: on UNIX-like platforms (although not macOS) this involves
-reading and parsing a ~300KB text file.  It is prudent, then, to call this function
-sparingly.
+This function can be expensive: on some platforms it involves loading
+and parsing a ~300KB disk file.  It's therefore prudent to call
+this sparingly.
 
 # Example
 
