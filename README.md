@@ -46,7 +46,7 @@ this sparingly.
 
 # Example
 
-(...)
+See [`examples/google.rs`](examples/google.rs).
 
 # License
 
