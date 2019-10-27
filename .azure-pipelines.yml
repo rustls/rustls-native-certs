@@ -9,3 +9,4 @@ jobs:
   steps:
     - template: admin/pipelines/rustup.yml
     - template: admin/pipelines/cargo-steps.yml
+    - template: admin/pipelines/macos-tests.yml
