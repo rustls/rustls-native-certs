@@ -2,7 +2,7 @@
 
 set -ex
 
-ANY_CA_PEM=one-existing-ca.pem
+ANY_CA_PEM=integration-tests/one-existing-ca.pem
 ANY_CA_SUBJECT="OU=GlobalSign Root CA - R3, O=GlobalSign, CN=GlobalSign"
 
 reset() {
