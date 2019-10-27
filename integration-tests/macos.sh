@@ -16,6 +16,9 @@ test_distrust_existing_root() {
 }
 
 blorp() {
+  security dump-trust-settings -s
+  security find-certificate -a -p > allcerts.pem
+  cat allcerts.pem
   security trust-settings-export -s system.dat
   cat system.dat
   security trust-settings-export -d admin.dat
