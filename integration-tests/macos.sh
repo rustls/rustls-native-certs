@@ -15,6 +15,14 @@ test_distrust_existing_root() {
   reset
 }
 
+blorp() {
+  security trust-settings-export -s system.dat
+  cat system.dat
+  security trust-settings-export -d admin.dat
+  cat admin.dat
+}
+
 reset
 test_distrust_existing_root
+blorp
 printf "\n*** All tests passed ***\n"
