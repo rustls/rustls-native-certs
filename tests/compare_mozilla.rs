@@ -122,3 +122,13 @@ fn test_contains_most_roots_known_by_mozilla() {
              missing_in_native_roots, diff * 100.);
     assert!(diff < threshold, "too many missing roots");
 }
+
+#[test]
+fn util_list_certs() {
+    let native = rustls_native_certs::load_native_certs()
+        .unwrap();
+
+    for (i, cert) in native.roots.iter().enumerate() {
+        println!("cert[{}] = {}", i, stringify_x500name(cert.to_trust_anchor().subject));
+    }
+}
