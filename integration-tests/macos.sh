@@ -22,24 +22,17 @@ assert_missing() {
   test $ret -eq 1
 }
 
+assert_exists() {
+  list | grep "$1" > /dev/null
+}
+
 test_distrust_existing_root() {
-  list | grep "$ANY_CA_SUBJECT"
+  assert_exists "$ANY_CA_SUBJECT"
   security add-trusted-cert -d -r deny $ANY_CA_PEM
   assert_missing "$ANY_CA_SUBJECT"
   reset
 }
 
-blorp() {
-  security dump-trust-settings -s
-  security find-certificate -a -p > allcerts.pem
-  cat allcerts.pem
-  security trust-settings-export -s system.dat
-  cat system.dat
-  security trust-settings-export -d admin.dat
-  cat admin.dat
-}
-
 reset
 test_distrust_existing_root
-blorp
 printf "\n*** All tests passed ***\n"
