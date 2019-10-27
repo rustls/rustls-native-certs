@@ -2,16 +2,30 @@
 
 set -ex
 
+ANY_CA_PEM=one-existing-ca.pem
+ANY_CA_SUBJECT="OU=GlobalSign Root CA - R3, O=GlobalSign, CN=GlobalSign"
+
 reset() {
-  echo reset
+  security remove-trusted-cert -d $ANY_CA_PEM || true
+  list | grep "$ANY_CA_SUBJECT"
 }
 
 list() {
   cargo test util_list_certs -- --nocapture 2>/dev/null
 }
 
+assert_missing() {
+  set +e
+  list | grep "$1"
+  ret=$?
+  set -e
+  test $ret -eq 1
+}
+
 test_distrust_existing_root() {
-  list
+  list | grep "$ANY_CA_SUBJECT"
+  security add-trusted-cert -d -r deny $ANY_CA_PEM
+  assert_missing "$ANY_CA_SUBJECT"
   reset
 }
 
