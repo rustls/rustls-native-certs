@@ -44,9 +44,41 @@ This function can be expensive: on some platforms it involves loading
 and parsing a ~300KB disk file.  It's therefore prudent to call
 this sparingly.
 
-# Example
+# Worked example
 
 See [`examples/google.rs`](examples/google.rs).
+
+# Should I use this or `webpki-roots`?
+
+(Background: [webpki-roots](https://crates.io/crates/webpki-roots) is a crate that compiles-in Mozilla's set of root certificates.)
+
+This crate is preferable in many ways to *webpki-roots*.
+To sum up the pros and cons:
+
+Pros:
+
+- **This crate respects local configuration of root certificates**: both
+  removal of roots that the user finds untrustworthy, and addition of locally-trusted roots.
+  _The latter case is exceedingly important if your application is required to work in
+  enterprise environments with "transparent" TLS-terminating middleboxes._
+- **This crate instantaneously reflects underlying system configuration**.  _Since webpki-roots
+  compiles in root certificates, getting an update to these requires taking regular updates
+  to this crate, plus recompilation and redeployment of the application.  This is a long-winded
+  process that may become a liability in the event of a severe misissuance._
+- **This crate is compatible with developer aids** such as [mkcert](https://github.com/FiloSottile/mkcert).
+
+Cons:
+
+- **The OS certificate store is occasionally "attacked" by [malware](https://en.wikipedia.org/wiki/Superfish)**
+  or just [bad software](https://sennheiser.zendesk.com/hc/en-us/articles/360011888254).
+- **The OS update system may, in fact, be quite poor at keeping the root certificates up-to-date**
+  if it is disabled or out-of-support.
+- **The quality of the `ca-certificates` package on debian-based Linux distributions is poor**.
+  At the time of writing, this ships many certificates not included in the Mozilla
+  set, either because they [failed an audit and were withdrawn](https://bugzilla.mozilla.org/show_bug.cgi?id=1448506) or
+  [were removed for mississuance](https://bugzilla.mozilla.org/show_bug.cgi?id=1552374).
+- **You may prefer to insulate yourself against local configuration** for support or
+  (perhaps inadvisable) security reasons.
 
 # License
 
