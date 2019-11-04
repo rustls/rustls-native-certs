@@ -22,6 +22,7 @@ rustls-native-certs is currently in development.
 If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [![Build Status](https://dev.azure.com/ctz99/ctz/_apis/build/status/ctz.rustls-native-certs?branchName=master)](https://dev.azure.com/ctz99/ctz/_build/latest?definitionId=5&branchName=master)
+[![Documentation](https://docs.rs/rustls-native-certs/badge.svg)](https://docs.rs/rustls-native-certs/)
 
 ## Release history:
 
