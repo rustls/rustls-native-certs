@@ -25,7 +25,7 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
-* Next release:
+* 0.1.0 (2019-11-04):
   - Initial release.
 
 # API
