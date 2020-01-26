@@ -29,7 +29,7 @@ fn load_file(store: &mut RootCertStore, path: &Path) -> Result<(), Error> {
 /// This function can be expensive: on some platforms it involves loading
 /// and parsing a ~300KB disk file.  It's therefore prudent to call
 /// this sparingly.
-pub fn load_native_certs() -> crate::PartialResult<RootCertStore, Error> {
+pub fn load_native_certs() -> PartialResult<RootCertStore, Error> {
     let likely_locations = openssl_probe::probe();
     let mut store = RootCertStore::empty();
     let mut first_error = None;
