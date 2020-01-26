@@ -45,7 +45,7 @@ snapshop of the root certificates found on this platform.  This
 function fails in a platform-specific way, expressed in a `std::io::Error`.
 
 When an error is returned, optionally a `rustls::RootCertStore` is also
-returned containing the certificate which *could* be loaded.  This means
+returned containing the certificates which *could* be loaded.  This means
 callers can opt-in to "best-effort" behaviour even in the presence of invalid
 certificates.
 
