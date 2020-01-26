@@ -26,6 +26,9 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
+* 0.2.0 (2020-01-26):
+  - Return valid certificates even in the presence of invalid ones.  This allows
+    callers to opt-in to "best effort" behaviour.
 * 0.1.0 (2019-11-04):
   - Initial release.
 
