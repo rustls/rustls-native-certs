@@ -7,6 +7,8 @@ use rustls::RootCertStore;
 use std::io::{Error, ErrorKind};
 use std::collections::HashMap;
 
+use crate::PartialResult;
+
 /// Loads root certificates found in the platform's native certificate
 /// store.
 ///
@@ -17,7 +19,7 @@ use std::collections::HashMap;
 /// This function can be expensive: on some platforms it involves loading
 /// and parsing a ~300KB disk file.  It's therefore prudent to call
 /// this sparingly.
-pub fn load_native_certs() -> Result<RootCertStore, Error> {
+pub fn load_native_certs() -> PartialResult<RootCertStore, Error> {
     let mut store = RootCertStore::empty();
 
     // The various domains are designed to interact like this:
@@ -36,7 +38,7 @@ pub fn load_native_certs() -> Result<RootCertStore, Error> {
     for domain in &[Domain::User, Domain::Admin, Domain::System] {
         let ts = TrustSettings::new(*domain);
         let iter = ts.iter()
-            .map_err(|err| Error::new(ErrorKind::Other, err))?;
+            .map_err(|err| (None, Error::new(ErrorKind::Other, err)))?;
 
         for cert in iter {
             let der = cert.to_der();
@@ -48,7 +50,7 @@ pub fn load_native_certs() -> Result<RootCertStore, Error> {
             // "Note that an empty Trust Settings array means "always trust this cert,
             //  with a resulting kSecTrustSettingsResult of kSecTrustSettingsResultTrustRoot".
             let trusted = ts.tls_trust_settings_for_certificate(&cert)
-                .map_err(|err| Error::new(ErrorKind::Other, err))?
+                .map_err(|err| (None, Error::new(ErrorKind::Other, err)))?
                 .unwrap_or(TrustSettingsForCertificate::TrustRoot);
 
             all_certs.entry(der)
@@ -56,18 +58,33 @@ pub fn load_native_certs() -> Result<RootCertStore, Error> {
         }
     }
 
+    let mut first_error = None;
+
     // Now we have all the certificates and an idea of whether
     // to use them.
     for (der, trusted) in all_certs.drain() {
         match trusted {
             TrustSettingsForCertificate::TrustRoot |
                 TrustSettingsForCertificate::TrustAsRoot => {
-                store.add(&rustls::Certificate(der))
-                    .map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
+                match store.add(&rustls::Certificate(der)) {
+                    Err(err) => {
+                        first_error = first_error
+                            .or_else(|| Some(Error::new(ErrorKind::InvalidData, err)));
+                    }
+                    _ => {}
+                };
             },
             _ => {} // discard
         }
     }
 
-    Ok(store)
+    if let Some(err) = first_error {
+        if store.is_empty() {
+            Err((None, err))
+        } else {
+            Err((Some(store), err))
+        }
+    } else {
+        Ok(store)
+    }
 }
