@@ -8,14 +8,14 @@
 /// work alongside an error.
 pub type PartialResult<T, E> = Result<T, (Option<T>, E)>;
 
-#[cfg(target_os = "linux")]
-mod linux;
-#[cfg(target_os = "linux")]
-use linux as platform;
+#[cfg(all(unix, not(target_os = "macos")))]
+mod unix;
+#[cfg(all(unix, not(target_os = "macos")))]
+use unix as platform;
 
-#[cfg(target_family = "windows")]
+#[cfg(windows)]
 mod windows;
-#[cfg(target_family = "windows")]
+#[cfg(windows)]
 use windows as platform;
 
 #[cfg(target_os = "macos")]
