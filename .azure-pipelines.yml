@@ -1,6 +1,6 @@
 variables:
-  clippy_toolchain: 1.36.0
-  minimum_toolchain: 1.36.0
+  clippy_toolchain: 1.39.0
+  minimum_toolchain: 1.39.0
 
 jobs:
 - template: admin/pipelines/clippy.yml
@@ -8,20 +8,20 @@ jobs:
     rustup_toolchain: ${{ variables.clippy_toolchain }}
 - job: Windows
   pool:
-    vmImage: vs2017-win2016
+    vmImage: windows-2019
   steps:
     - template: admin/pipelines/rustup.yml
     - template: admin/pipelines/cargo-steps.yml
 - job: MacOS
   pool:
-    vmImage: macOS-10.13
+    vmImage: macOS-10.15
   steps:
     - template: admin/pipelines/rustup.yml
     - template: admin/pipelines/cargo-steps.yml
     - template: admin/pipelines/macos-tests.yml
 - job: Linux
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: ubuntu-18.04
   strategy:
     matrix:
       stable:
