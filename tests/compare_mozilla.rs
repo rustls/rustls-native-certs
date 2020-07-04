@@ -85,6 +85,9 @@ fn test_does_not_have_many_roots_unknown_by_mozilla() {
         }
     }
 
+    #[cfg(windows)]
+    let threshold = 1.6; // no more than 160% extra roots; windows CI vm has lots of extra roots
+    #[cfg(not(windows))]
     let threshold = 0.5; // no more than 50% extra roots
     let diff = (missing_in_moz_roots as f64) / (mozilla.len() as f64);
     println!("mozilla: {:?}", mozilla.len());
