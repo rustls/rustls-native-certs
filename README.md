@@ -26,6 +26,8 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
+* 0.4.0 (2020-07-05):
+  - Update dependencies.
 * 0.3.0 (2020-02-24):
   - Support wider range of UNIX platforms.
   - Update dependencies.
