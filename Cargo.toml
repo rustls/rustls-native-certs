@@ -11,7 +11,7 @@ repository = "https://github.com/ctz/rustls-native-certs"
 categories = ["network-programming", "cryptography"]
 
 [dependencies]
-rustls = "0.17.0"
+rustls = "0.18.0"
 
 [dev-dependencies]
 webpki = "0.21"
@@ -26,4 +26,4 @@ schannel = "0.1.15"
 openssl-probe = "0.1.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-security-framework = "0.4.0"
+security-framework = "1.0.0"
