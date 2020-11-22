@@ -26,6 +26,9 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
+* 0.5.0 (2020-11-22):
+  - Update dependencies.
+  - Make rustls dependency optional, for use with reqwest's certificate types.  Thanks to @est31.
 * 0.4.0 (2020-07-05):
   - Update dependencies.
 * 0.3.0 (2020-02-24):
