@@ -24,7 +24,7 @@ pub type PartialResult<T, E> = Result<T, (Option<T>, E)>;
 pub fn load_native_certs() -> PartialResult<RootCertStore, Error> {
     struct RootCertStoreLoader {
         store: RootCertStore,
-    };
+    }
     impl RootStoreBuilder for RootCertStoreLoader {
         fn load_der(&mut self, der: Vec<u8>) -> Result<(), Error> {
             self.store.add(&rustls::Certificate(der))
