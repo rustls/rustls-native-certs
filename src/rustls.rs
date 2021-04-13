@@ -1,6 +1,8 @@
+use rustls_pemfile;
 use rustls::RootCertStore;
 use std::io::{Error, ErrorKind};
 use std::io::BufRead;
+use std::iter;
 use crate::RootStoreBuilder;
 
 /// Like `Result<T,E>`, but allows for functions that can return partially complete
@@ -31,9 +33,15 @@ pub fn load_native_certs() -> PartialResult<RootCertStore, Error> {
                 .map_err(|err| Error::new(ErrorKind::InvalidData, err))
         }
         fn load_pem_file(&mut self, rd: &mut dyn BufRead) -> Result<(), Error> {
-            self.store.add_pem_file(rd)
-                .map(|_| ())
-                .map_err(|()| Error::new(ErrorKind::InvalidData, format!("could not load PEM file")))
+            use rustls_pemfile::{read_one, Item};
+            iter::from_fn(|| read_one(rd).transpose()).try_for_each(|item| {
+                if let Item::X509Certificate(cert) = item? {
+                    self.load_der(cert)
+                } else {
+                    // Ignore other types of items.
+                    Ok(())
+                }
+            })
         }
     }
     let mut loader = RootCertStoreLoader {

@@ -4,8 +4,8 @@
 //! It provides the following functions:
 //! * A higher level function [load_native_certs](fn.build_native_certs.html)
 //!   which returns a `rustls::RootCertStore` pre-filled from the native
-//!   certificate store. It is only available if the `rustls` feature is
-//!   enabled.
+//!   certificate store. It is only available if the `rustls` and `rustls-pemfile`
+//!   features are enabled.
 //! * A lower level function [build_native_certs](fn.build_native_certs.html)
 //!   that lets callers pass their own certificate parsing logic. It is
 //!   available to all users.
@@ -25,7 +25,7 @@ mod macos;
 #[cfg(target_os = "macos")]
 use macos as platform;
 
-#[cfg(feature = "rustls")]
+#[cfg(all(feature = "rustls", feature = "rustls-pemfile"))]
 mod rustls;
 
 use std::io::Error;
