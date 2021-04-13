@@ -16,7 +16,7 @@ rustls = { version = "0.19.0", optional = true }
 [dev-dependencies]
 webpki = "0.21"
 webpki-roots = "0"
-ring = "0.16.5"
+ring = "0.16.20"
 untrusted = "0.7.0"
 
 [features]
