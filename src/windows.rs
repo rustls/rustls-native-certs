@@ -1,6 +1,6 @@
-use crate::RootStoreBuilder;
+use crate::Certificate;
 
-use std::io::{Error, ErrorKind};
+use std::io::Error;
 
 static PKIX_SERVER_AUTH: &str = "1.3.6.1.5.5.7.3.1";
 
@@ -13,25 +13,16 @@ fn usable_for_rustls(uses: schannel::cert_context::ValidUses) -> bool {
     }
 }
 
-pub fn build_native_certs<B: RootStoreBuilder>(builder: &mut B) -> Result<(), Error> {
-    let mut first_error = None;
+pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
+    let mut certs = Vec::new();
 
     let current_user_store = schannel::cert_store::CertStore::open_current_user("ROOT")?;
 
     for cert in current_user_store.certs() {
-        if !usable_for_rustls(cert.valid_uses().unwrap()) {
-            continue;
-        }
-
-        if let Err(err) = builder.load_der(cert.to_der().to_vec()) {
-            first_error = first_error
-                .or_else(|| Some(Error::new(ErrorKind::InvalidData, err)));
+        if usable_for_rustls(cert.valid_uses().unwrap()) {
+            certs.push(Certificate(cert.to_der().to_vec()));
         }
     }
 
-    if let Some(err) = first_error {
-        Err(err)
-    } else {
-        Ok(())
-    }
+    Ok(certs)
 }
