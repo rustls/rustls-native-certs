@@ -1,5 +1,3 @@
-#![cfg(feature = "rustls")]
-
 use std::sync::Arc;
 
 use std::net::TcpStream;
@@ -10,9 +8,13 @@ use webpki;
 use rustls_native_certs;
 
 fn check_site(domain: &str) {
+    let mut roots = rustls::RootCertStore::empty();
+    for cert in rustls_native_certs::load_native_certs().unwrap() {
+        roots.add(&rustls::Certificate(cert.0)).unwrap();
+    }
+
     let mut config = rustls::ClientConfig::new();
-    config.root_store = rustls_native_certs::load_native_certs()
-        .unwrap();
+    config.root_store = roots;
 
     let dns_name = webpki::DNSNameRef::try_from_ascii_str(domain)
         .unwrap();

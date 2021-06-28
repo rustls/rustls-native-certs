@@ -11,20 +11,14 @@ repository = "https://github.com/ctz/rustls-native-certs"
 categories = ["network-programming", "cryptography"]
 
 [dependencies]
-rustls = { version = "0.19.0", optional = true }
+rustls-pemfile = "0.2.1"
 
 [dev-dependencies]
 webpki = "0.21"
 webpki-roots = "0.21.1"
 ring = "0.16.5"
 untrusted = "0.7.0"
-
-[features]
-default = ["rustls"]
-
-[[example]]
-name = "google"
-required-features = ["rustls"]
+rustls = "0.19.1"
 
 [target.'cfg(windows)'.dependencies]
 schannel = "0.1.15"

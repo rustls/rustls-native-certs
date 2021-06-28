@@ -10,9 +10,13 @@ use webpki;
 use rustls::Session;
 
 fn main() {
+    let mut roots = rustls::RootCertStore::empty();
+    for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
+        roots.add(&rustls::Certificate(cert.0)).unwrap();
+    }
+
     let mut config = rustls::ClientConfig::new();
-    config.root_store = rustls_native_certs::load_native_certs()
-        .expect("could not load platform certs");
+    config.root_store = roots;
 
     let dns_name = webpki::DNSNameRef::try_from_ascii_str("google.com")
         .unwrap();

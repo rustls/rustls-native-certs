@@ -1,14 +1,15 @@
+use crate::Certificate;
+
 use security_framework::trust_settings::{
     Domain,
     TrustSettings,
     TrustSettingsForCertificate
 };
+
 use std::io::{Error, ErrorKind};
 use std::collections::HashMap;
 
-use crate::RootStoreBuilder;
-
-pub fn build_native_certs<B: RootStoreBuilder>(builder: &mut B) -> Result<(), Error> {
+pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
     // The various domains are designed to interact like this:
     //
     // "Per-user Trust Settings override locally administered
@@ -45,26 +46,16 @@ pub fn build_native_certs<B: RootStoreBuilder>(builder: &mut B) -> Result<(), Er
         }
     }
 
-    let mut first_error = None;
+    let mut certs = Vec::new();
 
     // Now we have all the certificates and an idea of whether
     // to use them.
     for (der, trusted) in all_certs.drain() {
-        match trusted {
-            TrustSettingsForCertificate::TrustRoot |
-                TrustSettingsForCertificate::TrustAsRoot => {
-                if let Err(err) = builder.load_der(der) {
-                    first_error = first_error
-                        .or_else(|| Some(Error::new(ErrorKind::InvalidData, err)));
-                }
-            },
-            _ => {} // discard
+        use TrustSettingsForCertificate::*;
+        if let TrustRoot | TrustAsRoot = trusted {
+            certs.push(Certificate(der));
         }
     }
 
-    if let Some(err) = first_error {
-        Err(err)
-    } else {
-        Ok(())
-    }
+    Ok(certs)
 }
