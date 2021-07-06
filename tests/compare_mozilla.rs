@@ -1,9 +1,10 @@
-// This test attempts to verify that the set of 'native'
-// certificates produced by this crate is roughly similar
-// to the set of certificates in the mozilla root program
-// as expressed by the `webpki-roots` crate.
-//
-// This is, obviously, quite a heuristic test.
+//! This test attempts to verify that the set of 'native'
+//! certificates produced by this crate is roughly similar
+//! to the set of certificates in the mozilla root program
+//! as expressed by the `webpki-roots` crate.
+//!
+//! This is, obviously, quite a heuristic test.
+#![cfg(feature = "rustls")]
 
 use std::collections::HashMap;
 use ring::io::der;

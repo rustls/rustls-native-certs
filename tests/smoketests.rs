@@ -1,3 +1,5 @@
+#![cfg(feature = "rustls")]
+
 use std::sync::Arc;
 
 use std::net::TcpStream;

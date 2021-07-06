@@ -22,6 +22,10 @@ untrusted = "0.7.0"
 [features]
 default = ["rustls"]
 
+[[example]]
+name = "google"
+required-features = ["rustls"]
+
 [target.'cfg(windows)'.dependencies]
 schannel = "0.1.15"
 
