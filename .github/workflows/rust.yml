@@ -1,0 +1,87 @@
+name: rustls
+
+permissions:
+  contents: read
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build+test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # test a bunch of toolchains on ubuntu
+        rust:
+          - stable
+          - beta
+          - nightly
+          - 1.39.0
+        os: [ubuntu-18.04]
+        # but only stable on macos/windows (slower platforms)
+        include:
+          - os: macos-latest
+            rust: stable
+          - os: windows-latest
+            rust: stable
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+
+      - name: cargo build (debug; default features)
+        run: cargo build
+
+      - name: cargo test (debug; default features)
+        run: cargo test
+        env:
+          RUST_BACKTRACE: 1
+
+      - name: cargo test (debug; all features)
+        run: cargo test --all-features
+        env:
+          RUST_BACKTRACE: 1
+
+      - name: cargo build (debug; no default features)
+        run: cargo build --no-default-features
+
+      - name: cargo test (debug; no default features; no run)
+        run: cargo test --no-default-features --no-run
+
+      - name: cargo test (release; no run)
+        run: cargo test --release --no-run
+
+      - name: run macOS integration test
+        if: matrix.os == 'macos-latest'
+        run: sudo bash integration-tests/macos.sh
+
+  clippy:
+    name: Clippy
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: true
+          components: clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-features -- -D warnings
