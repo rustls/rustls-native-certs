@@ -53,13 +53,10 @@ pub fn build_native_certs<B: RootStoreBuilder>(builder: &mut B) -> Result<(), Er
         match trusted {
             TrustSettingsForCertificate::TrustRoot |
                 TrustSettingsForCertificate::TrustAsRoot => {
-                match builder.load_der(der) {
-                    Err(err) => {
-                        first_error = first_error
-                            .or_else(|| Some(Error::new(ErrorKind::InvalidData, err)));
-                    }
-                    _ => {}
-                };
+                if let Err(err) = builder.load_der(der) {
+                    first_error = first_error
+                        .or_else(|| Some(Error::new(ErrorKind::InvalidData, err)));
+                }
             },
             _ => {} // discard
         }

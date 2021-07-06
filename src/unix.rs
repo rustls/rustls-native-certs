@@ -1,5 +1,5 @@
 use crate::RootStoreBuilder;
-use openssl_probe;
+
 use std::io::{Error, ErrorKind};
 use std::io::BufReader;
 use std::fs::File;
@@ -21,11 +21,8 @@ pub fn build_native_certs<B: RootStoreBuilder>(builder: &mut B) -> Result<(), Er
     let mut first_error = None;
 
     if let Some(file) = likely_locations.cert_file {
-        match load_file(builder, &file) {
-            Err(err) => {
-                first_error = first_error.or_else(|| Some(err));
-            }
-            _ => {}
+        if let Err(err) = load_file(builder, &file) {
+            first_error = first_error.or(Some(err));
         }
     }
 
