@@ -86,9 +86,12 @@ fn test_does_not_have_many_roots_unknown_by_mozilla() {
     }
 
     #[cfg(windows)]
-    let threshold = 1.6; // no more than 160% extra roots; windows CI vm has lots of extra roots
-    #[cfg(not(windows))]
+    let threshold = 2.0; // no more than 160% extra roots; windows CI vm has lots of extra roots
+    #[cfg(target_os = "macos")]
+    let threshold = 0.6; // macOS has a bunch of extra roots, too
+    #[cfg(not(any(windows, target_os = "macos")))]
     let threshold = 0.5; // no more than 50% extra roots
+
     let diff = (missing_in_moz_roots as f64) / (mozilla.len() as f64);
     println!("mozilla: {:?}", mozilla.len());
     println!("native: {:?}", native.len());
@@ -117,7 +120,9 @@ fn test_contains_most_roots_known_by_mozilla() {
 
     #[cfg(windows)]
     let threshold = 0.95; // no more than 95% extra roots; windows misses *many* roots
-    #[cfg(not(windows))]
+    #[cfg(target_os = "macos")]
+    let threshold = 0.6; // no more than 60% extra roots; macOS has a bunch of extra roots, too
+    #[cfg(not(any(windows, target_os = "macos")))]
     let threshold = 0.5; // no more than 50% extra roots
 
     let diff = (missing_in_native_roots as f64) / (mozilla.len() as f64);
