@@ -24,7 +24,7 @@ pub type PartialResult<T, E> = Result<T, (Option<T>, E)>;
 pub fn load_native_certs() -> PartialResult<RootCertStore, Error> {
     struct RootCertStoreLoader {
         store: RootCertStore,
-    };
+    }
     impl RootStoreBuilder for RootCertStoreLoader {
         fn load_der(&mut self, der: Vec<u8>) -> Result<(), Error> {
             self.store.add(&rustls::Certificate(der))
@@ -33,7 +33,7 @@ pub fn load_native_certs() -> PartialResult<RootCertStore, Error> {
         fn load_pem_file(&mut self, rd: &mut dyn BufRead) -> Result<(), Error> {
             self.store.add_pem_file(rd)
                 .map(|_| ())
-                .map_err(|()| Error::new(ErrorKind::InvalidData, format!("could not load PEM file")))
+                .map_err(|()| Error::new(ErrorKind::InvalidData, "could not load PEM file".to_owned()))
         }
     }
     let mut loader = RootCertStoreLoader {
