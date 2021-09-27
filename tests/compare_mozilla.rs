@@ -5,8 +5,10 @@
 //!
 //! This is, obviously, quite a heuristic test.
 use std::collections::HashMap;
+
 use ring::io::der;
 use untrusted;
+use webpki::TrustAnchor;
 
 fn stringify_x500name(subject: &[u8]) -> String {
     let mut parts = vec![];
@@ -74,7 +76,7 @@ fn test_does_not_have_many_roots_unknown_by_mozilla() {
     let mut missing_in_moz_roots = 0;
 
     for cert in &native {
-        let cert = webpki::trust_anchor_util::cert_der_as_trust_anchor(&cert.0).unwrap();
+        let cert = TrustAnchor::try_from_cert_der(&cert.0).unwrap();
         if let Some(moz) = mozilla.get(cert.spki) {
             assert_eq!(cert.subject, moz.subject,
                        "subjects differ for public key");
@@ -105,7 +107,7 @@ fn test_contains_most_roots_known_by_mozilla() {
 
     let mut native_map = HashMap::new();
     for anchor in &native {
-        let cert = webpki::trust_anchor_util::cert_der_as_trust_anchor(&anchor.0).unwrap();
+        let cert = TrustAnchor::try_from_cert_der(&anchor.0).unwrap();
         native_map.insert(cert.spki.to_vec(), anchor);
     }
 
@@ -139,7 +141,7 @@ fn util_list_certs() {
         .unwrap();
 
     for (i, cert) in native.iter().enumerate() {
-        let cert = webpki::trust_anchor_util::cert_der_as_trust_anchor(&cert.0).unwrap();
+        let cert = TrustAnchor::try_from_cert_der(&cert.0).unwrap();
         println!("cert[{}] = {}", i, stringify_x500name(cert.subject));
     }
 }

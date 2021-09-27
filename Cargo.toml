@@ -14,11 +14,11 @@ categories = ["network-programming", "cryptography"]
 rustls-pemfile = "0.2.1"
 
 [dev-dependencies]
-webpki = "0.21"
-webpki-roots = "0.21.1"
+webpki = "0.22"
+webpki-roots = "0.22"
 ring = "0.16.5"
 untrusted = "0.7.0"
-rustls = "0.19.1"
+rustls = "0.20"
 
 [target.'cfg(windows)'.dependencies]
 schannel = "0.1.15"
