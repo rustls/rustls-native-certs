@@ -1,10 +1,10 @@
+use std::convert::TryInto;
 use std::sync::Arc;
 
-use std::net::TcpStream;
 use std::io::{Read, Write};
+use std::net::TcpStream;
 
 use rustls;
-use webpki;
 use rustls_native_certs;
 
 fn check_site(domain: &str) {
@@ -13,21 +13,27 @@ fn check_site(domain: &str) {
         roots.add(&rustls::Certificate(cert.0)).unwrap();
     }
 
-    let mut config = rustls::ClientConfig::new();
-    config.root_store = roots;
+    let config = rustls::ClientConfig::builder()
+        .with_safe_defaults()
+        .with_root_certificates(roots)
+        .with_no_client_auth();
 
-    let dns_name = webpki::DNSNameRef::try_from_ascii_str(domain)
-        .unwrap();
-    let mut sess = rustls::ClientSession::new(&Arc::new(config), dns_name);
+    let mut conn =
+        rustls::ClientConnection::new(Arc::new(config), domain.try_into().unwrap()).unwrap();
     let mut sock = TcpStream::connect(format!("{}:443", domain)).unwrap();
-    let mut tls = rustls::Stream::new(&mut sess, &mut sock);
-    tls.write(format!("GET / HTTP/1.1\r\n\
+    let mut tls = rustls::Stream::new(&mut conn, &mut sock);
+    tls.write(
+        format!(
+            "GET / HTTP/1.1\r\n\
                        Host: {}\r\n\
                        Connection: close\r\n\
                        Accept-Encoding: identity\r\n\
-                       \r\n", domain)
-              .as_bytes())
-        .unwrap();
+                       \r\n",
+            domain
+        )
+        .as_bytes(),
+    )
+    .unwrap();
     let mut plaintext = [0u8; 1024];
     let len = tls.read(&mut plaintext).unwrap();
     assert!(plaintext[..len].starts_with(b"HTTP/1.1 ")); // or whatever
