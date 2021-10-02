@@ -5,10 +5,6 @@ use std::sync::Arc;
 use std::net::TcpStream;
 use std::io::{Read, Write};
 
-use rustls;
-use webpki;
-use rustls_native_certs;
-
 fn check_site(domain: &str) {
     let mut config = rustls::ClientConfig::new();
     config.root_store = rustls_native_certs::load_native_certs()
@@ -19,7 +15,7 @@ fn check_site(domain: &str) {
     let mut sess = rustls::ClientSession::new(&Arc::new(config), dns_name);
     let mut sock = TcpStream::connect(format!("{}:443", domain)).unwrap();
     let mut tls = rustls::Stream::new(&mut sess, &mut sock);
-    tls.write(format!("GET / HTTP/1.1\r\n\
+    tls.write_all(format!("GET / HTTP/1.1\r\n\
                        Host: {}\r\n\
                        Connection: close\r\n\
                        Accept-Encoding: identity\r\n\

@@ -3,10 +3,6 @@ use std::sync::Arc;
 use std::net::TcpStream;
 use std::io::{Read, Write, stdout};
 
-use rustls;
-use rustls_native_certs;
-use webpki;
-
 use rustls::Session;
 
 fn main() {
@@ -20,7 +16,7 @@ fn main() {
     let mut sock = TcpStream::connect("google.com:443")
         .expect("cannot connect");
     let mut tls = rustls::Stream::new(&mut sess, &mut sock);
-    tls.write(concat!("GET / HTTP/1.1\r\n",
+    tls.write_all(concat!("GET / HTTP/1.1\r\n",
                       "Host: google.com\r\n",
                       "Connection: close\r\n",
                       "Accept-Encoding: identity\r\n",
