@@ -28,15 +28,60 @@ use macos as platform;
 #[cfg(feature = "rustls")]
 mod rustls;
 
-use std::io::Error;
+#[cfg(feature = "webpki")]
+mod webpki;
+
 use std::io::BufRead;
+use std::io::Error;
+
+/// Like `Result<T,E>`, but allows for functions that can return partially complete
+/// work alongside an error.
+pub type PartialResult<T, E> = Result<T, (Option<T>, E)>;
 
 #[cfg(feature = "rustls")]
-pub use crate::rustls::{load_native_certs, PartialResult};
+pub use crate::rustls::load_to_rustls;
+
+#[cfg(feature = "webpki")]
+pub use crate::webpki::load_to_webpki;
+
+// log for logging (optional).
+#[cfg(feature = "logging")]
+use log::debug;
+
+#[cfg(not(feature = "logging"))]
+#[macro_use]
+mod log {
+    macro_rules! debug    ( ($($tt:tt)*) => {{}} );
+}
 
 pub trait RootStoreBuilder {
     fn load_der(&mut self, der: Vec<u8>) -> Result<(), Error>;
-    fn load_pem_file(&mut self, rd: &mut dyn BufRead) -> Result<(), Error>;
+
+    // A default implementation that ignores invalid certs
+    // and sections that aren't for public certificates.
+    // Code from rustls::RootCertStore::add_parseable_certificates.
+    #[cfg_attr(not(feature = "logging"), allow(unused_variables))]
+    fn load_pem_file(&mut self, rd: &mut dyn BufRead) -> Result<(), Error> {
+        let mut valid_count = 0;
+        let mut invalid_count = 0;
+
+        for der_cert in rustls_pemfile::certs(rd)? {
+            match self.load_der(der_cert) {
+                Ok(_) => valid_count += 1,
+                Err(err) => {
+                    debug!("certificate parsing failed: {:?}", err);
+                    invalid_count += 1
+                }
+            }
+        }
+
+        debug!(
+            "load_pem_file processed {} valid and {} invalid certs",
+            valid_count, invalid_count
+        );
+
+        Ok(())
+    }
 }
 
 /// Loads root certificates found in the platform's native certificate

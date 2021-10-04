@@ -11,16 +11,29 @@ repository = "https://github.com/ctz/rustls-native-certs"
 categories = ["network-programming", "cryptography"]
 
 [dependencies]
-rustls = { version = "0.19.0", optional = true }
+rustls-pemfile = "0.2"
+log = { version = "0.4", optional = true }
+rustls = { version = "0.20", optional = true }
+webpki = { version = "0.22", optional = true }
 
 [dev-dependencies]
-webpki = "0.21"
-webpki-roots = "0.21.1"
 ring = "0.16.5"
+rustls = "0.20"
 untrusted = "0.7.0"
+webpki = "0.22"
+webpki-roots = "0.22"
 
 [features]
-default = ["rustls"]
+default = ["rustls", "webpki"]
+logging = ["log"]
+
+[[test]]
+name = "smoketests"
+required-features = ["rustls"]
+
+[[test]]
+name = "compare_mozilla"
+required-features = ["webpki"]
 
 [[example]]
 name = "google"

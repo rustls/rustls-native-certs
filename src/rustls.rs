@@ -1,13 +1,8 @@
-use rustls::RootCertStore;
-use std::io::{Error, ErrorKind};
-use std::io::BufRead;
 use crate::RootStoreBuilder;
 
-/// Like `Result<T,E>`, but allows for functions that can return partially complete
-/// work alongside an error.
-///
-/// *This type is available only if the crate is built with the "rustls" feature.*
-pub type PartialResult<T, E> = Result<T, (Option<T>, E)>;
+use rustls::RootCertStore;
+
+use std::io::{Error, ErrorKind};
 
 /// Loads root certificates found in the platform's native certificate
 /// store.
@@ -21,19 +16,15 @@ pub type PartialResult<T, E> = Result<T, (Option<T>, E)>;
 /// this sparingly.
 ///
 /// *This function is available only if the crate is built with the "rustls" feature.*
-pub fn load_native_certs() -> PartialResult<RootCertStore, Error> {
+pub fn load_to_rustls() -> crate::PartialResult<RootCertStore, Error> {
     struct RootCertStoreLoader {
         store: RootCertStore,
     }
     impl RootStoreBuilder for RootCertStoreLoader {
         fn load_der(&mut self, der: Vec<u8>) -> Result<(), Error> {
-            self.store.add(&rustls::Certificate(der))
+            self.store
+                .add(&rustls::Certificate(der))
                 .map_err(|err| Error::new(ErrorKind::InvalidData, err))
-        }
-        fn load_pem_file(&mut self, rd: &mut dyn BufRead) -> Result<(), Error> {
-            self.store.add_pem_file(rd)
-                .map(|_| ())
-                .map_err(|()| Error::new(ErrorKind::InvalidData, "could not load PEM file".to_owned()))
         }
     }
     let mut loader = RootCertStoreLoader {
