@@ -7,7 +7,6 @@
 use std::collections::HashMap;
 
 use ring::io::der;
-use untrusted;
 use webpki::TrustAnchor;
 
 fn stringify_x500name(subject: &[u8]) -> String {
@@ -19,30 +18,30 @@ fn stringify_x500name(subject: &[u8]) -> String {
             .unwrap();
         assert!(tag == 0x31); // sequence, constructed, context=1
 
-        let mut inner = untrusted::Reader::new(contents.into());
+        let mut inner = untrusted::Reader::new(contents);
         let pair = der::expect_tag_and_get_value(&mut inner, der::Tag::Sequence)
             .unwrap();
 
-        let mut pair = untrusted::Reader::new(pair.into());
+        let mut pair = untrusted::Reader::new(pair);
         let oid = der::expect_tag_and_get_value(&mut pair, der::Tag::OID)
             .unwrap();
         let (valuety, value) = der::read_tag_and_get_value(&mut pair)
             .unwrap();
 
         let name = match oid.as_slice_less_safe() {
-            &[0x55, 0x04, 0x03] => "CN",
-            &[0x55, 0x04, 0x05] => "serialNumber",
-            &[0x55, 0x04, 0x06] => "C",
-            &[0x55, 0x04, 0x07] => "L",
-            &[0x55, 0x04, 0x08] => "ST",
-            &[0x55, 0x04, 0x09] => "STREET",
-            &[0x55, 0x04, 0x0a] => "O",
-            &[0x55, 0x04, 0x0b] => "OU",
-            &[0x55, 0x04, 0x11] => "postalCode",
-            &[0x55, 0x04, 0x61] => "organizationIdentifier",
-            &[0x09, 0x92, 0x26, 0x89, 0x93, 0xf2, 0x2c, 0x64, 0x01, 0x19] => "domainComponent",
-            &[0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x01] => "emailAddress",
-            _ => panic!("unhandled x500 attr {:?}", oid)
+            [0x55, 0x04, 0x03] => "CN",
+            [0x55, 0x04, 0x05] => "serialNumber",
+            [0x55, 0x04, 0x06] => "C",
+            [0x55, 0x04, 0x07] => "L",
+            [0x55, 0x04, 0x08] => "ST",
+            [0x55, 0x04, 0x09] => "STREET",
+            [0x55, 0x04, 0x0a] => "O",
+            [0x55, 0x04, 0x0b] => "OU",
+            [0x55, 0x04, 0x11] => "postalCode",
+            [0x55, 0x04, 0x61] => "organizationIdentifier",
+            [0x09, 0x92, 0x26, 0x89, 0x93, 0xf2, 0x2c, 0x64, 0x01, 0x19] => "domainComponent",
+            [0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x01] => "emailAddress",
+            _ => panic!("unhandled x500 attr {:?}", oid),
         };
 
         let str_value = match valuety {
