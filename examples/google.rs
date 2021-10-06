@@ -4,9 +4,6 @@ use std::sync::Arc;
 use std::io::{stdout, Read, Write};
 use std::net::TcpStream;
 
-use rustls;
-use rustls_native_certs;
-
 fn main() {
     let mut roots = rustls::RootCertStore::empty();
     for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
@@ -22,7 +19,7 @@ fn main() {
         rustls::ClientConnection::new(Arc::new(config), "google.com".try_into().unwrap()).unwrap();
     let mut sock = TcpStream::connect("google.com:443").expect("cannot connect");
     let mut tls = rustls::Stream::new(&mut conn, &mut sock);
-    tls.write(
+    tls.write_all(
         concat!(
             "GET / HTTP/1.1\r\n",
             "Host: google.com\r\n",

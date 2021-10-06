@@ -4,9 +4,6 @@ use std::sync::Arc;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
-use rustls;
-use rustls_native_certs;
-
 fn check_site(domain: &str) {
     let mut roots = rustls::RootCertStore::empty();
     for cert in rustls_native_certs::load_native_certs().unwrap() {
@@ -22,7 +19,7 @@ fn check_site(domain: &str) {
         rustls::ClientConnection::new(Arc::new(config), domain.try_into().unwrap()).unwrap();
     let mut sock = TcpStream::connect(format!("{}:443", domain)).unwrap();
     let mut tls = rustls::Stream::new(&mut conn, &mut sock);
-    tls.write(
+    tls.write_all(
         format!(
             "GET / HTTP/1.1\r\n\
                        Host: {}\r\n\
