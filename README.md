@@ -26,6 +26,8 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
+* 0.6.0 (2021-10-13):
+  - Remove rustls dependency entirely.
 * 0.5.0 (2020-11-22):
   - Update dependencies.
   - Make rustls dependency optional, for use with reqwest's certificate types.  Thanks to @est31.
@@ -86,6 +88,9 @@ Pros:
 
 Cons:
 
+- **Use of the OS certificate store is not the same as relying on OS trust verification**
+  because platform verifiers might impose additional criteria before deciding whether to trust
+  a root ostensibly included in the OS certificate store (for example, an expiration date).
 - **The OS certificate store is occasionally "attacked" by [malware](https://en.wikipedia.org/wiki/Superfish)**
   or just [bad software](https://sennheiser.zendesk.com/hc/en-us/articles/360011888254).
 - **The OS update system may, in fact, be quite poor at keeping the root certificates up-to-date**
