@@ -45,17 +45,12 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 This library exposes a single function with this signature:
 
 ```rust
-pub fn load_native_certs() -> Result<rustls::RootCertStore, (Option<rustls::RootCertStore>, std::io::Error)>
+pub fn load_native_certs() -> Result<Vec<Certificate>, std::io::Error>
 ```
 
-On success, this returns a `rustls::RootCertStore` loaded with a
-snapshop of the root certificates found on this platform.  This
+On success, this returns a `Vec<Certificate>` loaded with a
+snapshot of the root certificates found on this platform.  This
 function fails in a platform-specific way, expressed in a `std::io::Error`.
-
-When an error is returned, optionally a `rustls::RootCertStore` is also
-returned containing the certificates which *could* be loaded.  This means
-callers can opt-in to "best-effort" behaviour even in the presence of invalid
-certificates.
 
 This function can be expensive: on some platforms it involves loading
 and parsing a ~300KB disk file.  It's therefore prudent to call
