@@ -5,7 +5,7 @@ use std::env;
 use std::io::Error;
 use std::path::PathBuf;
 
-const ENV_CERT_FILE: &'static str = "SSL_CERT_FILE";
+const ENV_CERT_FILE: &str = "SSL_CERT_FILE";
 
 /// Returns None if SSL_CERT_FILE is not defined in the current environment.
 ///
