@@ -10,6 +10,8 @@
 //!   that lets callers pass their own certificate parsing logic. It is
 //!   available to all users.
 
+mod cert_file;
+
 #[cfg(all(unix, not(target_os = "macos")))]
 mod unix;
 #[cfg(all(unix, not(target_os = "macos")))]
