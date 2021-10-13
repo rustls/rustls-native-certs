@@ -5,6 +5,10 @@ platform's native certificate store when operating as a TLS client.
 
 This is supported on Windows, macOS and Linux:
 
+- On all platforms, the `SSL_CERT_FILE` environment variable is checked first.
+  If that's set, certificates are loaded from the path specified by that variable,
+  or an error is returned if certificates cannot be loaded from the given path.
+  If it's not set, then the platform-specific certificate source is used.
 - On Windows, certificates are loaded from the system certificate store.
   The [`schannel`](https://github.com/steffengy/schannel-rs) crate is used to access
   the Windows certificate store APIs.

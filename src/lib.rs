@@ -11,6 +11,7 @@
 //!   available to all users.
 
 mod cert_file;
+mod cert_env;
 
 #[cfg(all(unix, not(target_os = "macos")))]
 mod unix;
@@ -38,7 +39,8 @@ use std::io::Error;
 /// and parsing a ~300KB disk file.  It's therefore prudent to call
 /// this sparingly.
 pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
-    platform::load_native_certs()
+    cert_env::load_certs_from_env()
+    .unwrap_or_else(platform::load_native_certs)
 }
 
 pub struct Certificate(pub Vec<u8>);
