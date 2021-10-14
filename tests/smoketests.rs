@@ -8,6 +8,8 @@ use std::net::TcpStream;
 use std::env;
 use std::path::PathBuf;
 
+// #[serial] is used on all these tests to run them sequentially. If they're run in parallel,
+// the global env var configuration in the env var test interferes with the others.
 use serial_test::serial;
 
 fn check_site(domain: &str) {
