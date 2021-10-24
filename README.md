@@ -26,7 +26,7 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
-* 0.6.0 (2021-10-13):
+* 0.6.0 (2021-10-24):
   - Remove rustls dependency entirely.
 * 0.5.0 (2020-11-22):
   - Update dependencies.
