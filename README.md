@@ -30,6 +30,8 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
+* 0.6.1 (2021-10-25):
+  - Allow overrides using `SSL_CERT_FILE` on all platforms.
 * 0.6.0 (2021-10-24):
   - Remove rustls dependency entirely.
 * 0.5.0 (2020-11-22):
