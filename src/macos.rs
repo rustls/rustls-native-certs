@@ -1,13 +1,9 @@
 use crate::Certificate;
 
-use security_framework::trust_settings::{
-    Domain,
-    TrustSettings,
-    TrustSettingsForCertificate
-};
+use security_framework::trust_settings::{Domain, TrustSettings, TrustSettingsForCertificate};
 
-use std::io::{Error, ErrorKind};
 use std::collections::HashMap;
+use std::io::{Error, ErrorKind};
 
 pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
     // The various domains are designed to interact like this:
@@ -25,7 +21,8 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
 
     for domain in &[Domain::User, Domain::Admin, Domain::System] {
         let ts = TrustSettings::new(*domain);
-        let iter = ts.iter()
+        let iter = ts
+            .iter()
             .map_err(|err| Error::new(ErrorKind::Other, err))?;
 
         for cert in iter {
@@ -37,12 +34,12 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
             //
             // "Note that an empty Trust Settings array means "always trust this cert,
             //  with a resulting kSecTrustSettingsResult of kSecTrustSettingsResultTrustRoot".
-            let trusted = ts.tls_trust_settings_for_certificate(&cert)
+            let trusted = ts
+                .tls_trust_settings_for_certificate(&cert)
                 .map_err(|err| Error::new(ErrorKind::Other, err))?
                 .unwrap_or(TrustSettingsForCertificate::TrustRoot);
 
-            all_certs.entry(der)
-                .or_insert(trusted);
+            all_certs.entry(der).or_insert(trusted);
         }
     }
 

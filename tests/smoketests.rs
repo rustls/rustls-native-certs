@@ -3,9 +3,9 @@ use std::sync::Arc;
 
 use std::panic;
 
+use std::env;
 use std::io::{Read, Write};
 use std::net::TcpStream;
-use std::env;
 use std::path::PathBuf;
 
 // #[serial] is used on all these tests to run them sequentially. If they're run in parallel,
@@ -15,7 +15,9 @@ use serial_test::serial;
 fn check_site(domain: &str) {
     let mut roots = rustls::RootCertStore::empty();
     for cert in rustls_native_certs::load_native_certs().unwrap() {
-        roots.add(&rustls::Certificate(cert.0)).unwrap();
+        roots
+            .add(&rustls::Certificate(cert.0))
+            .unwrap();
     }
 
     let config = rustls::ClientConfig::builder()
@@ -83,16 +85,15 @@ fn apple() {
 #[test]
 #[serial]
 fn badssl_with_env() {
-    let result = panic::catch_unwind(|| {
-        check_site("self-signed.badssl.com")
-    });
+    let result = panic::catch_unwind(|| check_site("self-signed.badssl.com"));
     // Self-signed certs should never be trusted by default:
     assert!(result.is_err());
 
     // But they should be trusted if SSL_CERT_FILE is set:
-    env::set_var("SSL_CERT_FILE",
+    env::set_var(
+        "SSL_CERT_FILE",
         // The CA cert, downloaded directly from the site itself:
-        PathBuf::from("./tests/badssl-com-chain.pem")
+        PathBuf::from("./tests/badssl-com-chain.pem"),
     );
     check_site("self-signed.badssl.com");
     env::remove_var("SSL_CERT_FILE");

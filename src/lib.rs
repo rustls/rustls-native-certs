@@ -25,11 +25,11 @@ mod macos;
 #[cfg(target_os = "macos")]
 use macos as platform;
 
-use std::io::{Error, ErrorKind};
-use std::io::BufReader;
-use std::fs::File;
-use std::path::{Path,PathBuf};
 use std::env;
+use std::fs::File;
+use std::io::BufReader;
+use std::io::{Error, ErrorKind};
+use std::path::{Path, PathBuf};
 
 /// Loads root certificates found in the platform's native certificate
 /// store, executing callbacks on the provided builder.
@@ -40,8 +40,7 @@ use std::env;
 /// and parsing a ~300KB disk file.  It's therefore prudent to call
 /// this sparingly.
 pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
-    load_certs_from_env()
-    .unwrap_or_else(platform::load_native_certs)
+    load_certs_from_env().unwrap_or_else(platform::load_native_certs)
 }
 
 pub struct Certificate(pub Vec<u8>);
@@ -53,9 +52,7 @@ const ENV_CERT_FILE: &str = "SSL_CERT_FILE";
 /// If it is defined, it is always used, so it must be a path to a real
 /// file from which certificates can be loaded successfully.
 fn load_certs_from_env() -> Option<Result<Vec<Certificate>, Error>> {
-    let cert_var_path = PathBuf::from(
-        env::var_os(ENV_CERT_FILE)?
-    );
+    let cert_var_path = PathBuf::from(env::var_os(ENV_CERT_FILE)?);
 
     Some(load_pem_certs(&cert_var_path))
 }
@@ -65,9 +62,10 @@ fn load_pem_certs(path: &Path) -> Result<Vec<Certificate>, Error> {
     let mut f = BufReader::new(f);
 
     match rustls_pemfile::certs(&mut f) {
-        Ok(contents) => {
-            Ok(contents.into_iter().map(Certificate).collect())
-        }
+        Ok(contents) => Ok(contents
+            .into_iter()
+            .map(Certificate)
+            .collect()),
         Err(_) => Err(Error::new(
             ErrorKind::InvalidData,
             format!("Could not load PEM file {:?}", path),
