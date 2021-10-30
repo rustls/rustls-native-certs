@@ -14,19 +14,15 @@ fn stringify_x500name(subject: &[u8]) -> String {
     let mut reader = untrusted::Reader::new(subject.into());
 
     while !reader.at_end() {
-        let (tag, contents) = der::read_tag_and_get_value(&mut reader)
-            .unwrap();
+        let (tag, contents) = der::read_tag_and_get_value(&mut reader).unwrap();
         assert!(tag == 0x31); // sequence, constructed, context=1
 
         let mut inner = untrusted::Reader::new(contents);
-        let pair = der::expect_tag_and_get_value(&mut inner, der::Tag::Sequence)
-            .unwrap();
+        let pair = der::expect_tag_and_get_value(&mut inner, der::Tag::Sequence).unwrap();
 
         let mut pair = untrusted::Reader::new(pair);
-        let oid = der::expect_tag_and_get_value(&mut pair, der::Tag::OID)
-            .unwrap();
-        let (valuety, value) = der::read_tag_and_get_value(&mut pair)
-            .unwrap();
+        let oid = der::expect_tag_and_get_value(&mut pair, der::Tag::OID).unwrap();
+        let (valuety, value) = der::read_tag_and_get_value(&mut pair).unwrap();
 
         let name = match oid.as_slice_less_safe() {
             [0x55, 0x04, 0x03] => "CN",
@@ -47,7 +43,7 @@ fn stringify_x500name(subject: &[u8]) -> String {
         let str_value = match valuety {
             // PrintableString, UTF8String, TeletexString or IA5String
             0x0c | 0x13 | 0x14 | 0x16 => std::str::from_utf8(value.as_slice_less_safe()).unwrap(),
-            _ => panic!("unhandled x500 value type {:?}", valuety)
+            _ => panic!("unhandled x500 value type {:?}", valuety),
         };
 
         parts.push(format!("{}={}", name, str_value));
@@ -56,7 +52,9 @@ fn stringify_x500name(subject: &[u8]) -> String {
     parts.join(", ")
 }
 
-fn to_map<'a>(anchors: &'a [webpki::TrustAnchor<'a>]) -> HashMap<Vec<u8>, &'a webpki::TrustAnchor<'a>> {
+fn to_map<'a>(
+    anchors: &'a [webpki::TrustAnchor<'a>],
+) -> HashMap<Vec<u8>, &'a webpki::TrustAnchor<'a>> {
     let mut r = HashMap::new();
 
     for anchor in anchors {
@@ -68,8 +66,7 @@ fn to_map<'a>(anchors: &'a [webpki::TrustAnchor<'a>]) -> HashMap<Vec<u8>, &'a we
 
 #[test]
 fn test_does_not_have_many_roots_unknown_by_mozilla() {
-    let native = rustls_native_certs::load_native_certs()
-        .unwrap();
+    let native = rustls_native_certs::load_native_certs().unwrap();
     let mozilla = to_map(webpki_roots::TLS_SERVER_ROOTS.0);
 
     let mut missing_in_moz_roots = 0;
@@ -77,10 +74,12 @@ fn test_does_not_have_many_roots_unknown_by_mozilla() {
     for cert in &native {
         let cert = TrustAnchor::try_from_cert_der(&cert.0).unwrap();
         if let Some(moz) = mozilla.get(cert.spki) {
-            assert_eq!(cert.subject, moz.subject,
-                       "subjects differ for public key");
+            assert_eq!(cert.subject, moz.subject, "subjects differ for public key");
         } else {
-            println!("Native anchor {:?} is missing from mozilla set", stringify_x500name(cert.subject));
+            println!(
+                "Native anchor {:?} is missing from mozilla set",
+                stringify_x500name(cert.subject)
+            );
             missing_in_moz_roots += 1;
         }
     }
@@ -95,14 +94,17 @@ fn test_does_not_have_many_roots_unknown_by_mozilla() {
     let diff = (missing_in_moz_roots as f64) / (mozilla.len() as f64);
     println!("mozilla: {:?}", mozilla.len());
     println!("native: {:?}", native.len());
-    println!("{:?} anchors present in native set but not mozilla ({}%)", missing_in_moz_roots, diff * 100.);
+    println!(
+        "{:?} anchors present in native set but not mozilla ({}%)",
+        missing_in_moz_roots,
+        diff * 100.
+    );
     assert!(diff < threshold, "too many unknown roots");
 }
 
 #[test]
 fn test_contains_most_roots_known_by_mozilla() {
-    let native = rustls_native_certs::load_native_certs()
-        .unwrap();
+    let native = rustls_native_certs::load_native_certs().unwrap();
 
     let mut native_map = HashMap::new();
     for anchor in &native {
@@ -114,7 +116,10 @@ fn test_contains_most_roots_known_by_mozilla() {
     let mozilla = webpki_roots::TLS_SERVER_ROOTS.0;
     for cert in mozilla {
         if native_map.get(cert.spki).is_none() {
-            println!("Mozilla anchor {:?} is missing from native set", stringify_x500name(cert.subject));
+            println!(
+                "Mozilla anchor {:?} is missing from native set",
+                stringify_x500name(cert.subject)
+            );
             missing_in_native_roots += 1;
         }
     }
@@ -129,15 +134,17 @@ fn test_contains_most_roots_known_by_mozilla() {
     let diff = (missing_in_native_roots as f64) / (mozilla.len() as f64);
     println!("mozilla: {:?}", mozilla.len());
     println!("native: {:?}", native.len());
-    println!("{:?} anchors present in mozilla set but not native ({}%)",
-             missing_in_native_roots, diff * 100.);
+    println!(
+        "{:?} anchors present in mozilla set but not native ({}%)",
+        missing_in_native_roots,
+        diff * 100.
+    );
     assert!(diff < threshold, "too many missing roots");
 }
 
 #[test]
 fn util_list_certs() {
-    let native = rustls_native_certs::load_native_certs()
-        .unwrap();
+    let native = rustls_native_certs::load_native_certs().unwrap();
 
     for (i, cert) in native.iter().enumerate() {
         let cert = TrustAnchor::try_from_cert_der(&cert.0).unwrap();

@@ -7,9 +7,9 @@ static PKIX_SERVER_AUTH: &str = "1.3.6.1.5.5.7.3.1";
 fn usable_for_rustls(uses: schannel::cert_context::ValidUses) -> bool {
     match uses {
         schannel::cert_context::ValidUses::All => true,
-        schannel::cert_context::ValidUses::Oids(strs) => {
-            strs.iter().any(|x| x == PKIX_SERVER_AUTH)
-        }
+        schannel::cert_context::ValidUses::Oids(strs) => strs
+            .iter()
+            .any(|x| x == PKIX_SERVER_AUTH),
     }
 }
 

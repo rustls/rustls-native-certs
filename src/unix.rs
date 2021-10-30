@@ -1,5 +1,5 @@
-use crate::Certificate;
 use crate::load_pem_certs;
+use crate::Certificate;
 
 use std::io::Error;
 
@@ -8,6 +8,6 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
 
     match likely_locations.cert_file {
         Some(cert_file) => load_pem_certs(&cert_file),
-        None => Ok(Vec::new())
+        None => Ok(Vec::new()),
     }
 }

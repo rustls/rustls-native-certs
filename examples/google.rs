@@ -7,7 +7,9 @@ use std::net::TcpStream;
 fn main() {
     let mut roots = rustls::RootCertStore::empty();
     for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
-        roots.add(&rustls::Certificate(cert.0)).unwrap();
+        roots
+            .add(&rustls::Certificate(cert.0))
+            .unwrap();
     }
 
     let config = rustls::ClientConfig::builder()
