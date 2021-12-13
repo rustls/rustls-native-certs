@@ -1,14 +1,22 @@
 //! rustls-native-certs allows rustls to use the platform's native certificate
 //! store when operating as a TLS client.
 //!
-//! It provides the following functions:
-//! * A higher level function [load_native_certs](fn.build_native_certs.html)
-//!   which returns a `rustls::RootCertStore` pre-filled from the native
-//!   certificate store. It is only available if the `rustls` feature is
-//!   enabled.
-//! * A lower level function [build_native_certs](fn.build_native_certs.html)
-//!   that lets callers pass their own certificate parsing logic. It is
-//!   available to all users.
+//! It provides a single function [`load_native_certs()`], which returns a
+//! collection of certificates found by reading the platform-native
+//! certificate store. [`Certificate`] here is just a marker newtype
+//! that denotes a DER-encoded X.509 certificate encoded as a `Vec<u8>`.
+//!
+//! If you want to load these certificates into a `rustls::RootCertStore`,
+//! you'll likely want to do something like this:
+//!
+//! ```no_run
+//! let mut roots = rustls::RootCertStore::empty();
+//! for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
+//!     roots
+//!         .add(&rustls::Certificate(cert.0))
+//!         .unwrap();
+//! }
+//! ```
 
 #[cfg(all(unix, not(target_os = "macos")))]
 mod unix;
@@ -31,8 +39,7 @@ use std::io::BufReader;
 use std::io::{Error, ErrorKind};
 use std::path::{Path, PathBuf};
 
-/// Loads root certificates found in the platform's native certificate
-/// store, executing callbacks on the provided builder.
+/// Load root certificates found in the platform's native certificate store.
 ///
 /// This function fails in a platform-specific way, expressed in a `std::io::Error`.
 ///
@@ -43,6 +50,7 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
     load_certs_from_env().unwrap_or_else(platform::load_native_certs)
 }
 
+/// A newtype representing a single DER-encoded X.509 certificate encoded as a `Vec<u8>`.
 pub struct Certificate(pub Vec<u8>);
 
 const ENV_CERT_FILE: &str = "SSL_CERT_FILE";
