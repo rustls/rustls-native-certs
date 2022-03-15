@@ -17,10 +17,10 @@ rustls-pemfile = "0.3.0"
 webpki = "0.22"
 webpki-roots = "0.22"
 ring = "0.16.5"
-untrusted = "0.7.0"
+untrusted = "0.7.1"
 rustls = "0.20"
-x509-parser = "0.12"
-serial_test = "0.5.1"
+x509-parser = "0.13"
+serial_test = "0.6.0"
 
 [target.'cfg(windows)'.dependencies]
 schannel = "0.1.15"
