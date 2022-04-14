@@ -19,7 +19,7 @@ webpki-roots = "0.22"
 ring = "0.16.5"
 untrusted = "0.7.0"
 rustls = "0.20"
-x509-parser = "0.13"
+x509-parser = "0.12"
 serial_test = "0.6.0"
 
 [target.'cfg(windows)'.dependencies]
