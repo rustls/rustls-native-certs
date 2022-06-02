@@ -3,8 +3,13 @@
 //!
 //! It provides a single function [`load_native_certs()`], which returns a
 //! collection of certificates found by reading the platform-native
-//! certificate store. [`Certificate`] here is just a marker newtype
-//! that denotes a DER-encoded X.509 certificate encoded as a `Vec<u8>`.
+//! certificate store.
+//!
+//! If the SSL_CERT_FILE environment variable is set, certificates (in PEM
+//! format) are read from that file instead.
+//!
+//! [`Certificate`] here is just a marker newtype that denotes a DER-encoded
+//! X.509 certificate encoded as a `Vec<u8>`.
 //!
 //! If you want to load these certificates into a `rustls::RootCertStore`,
 //! you'll likely want to do something like this:
@@ -40,6 +45,9 @@ use std::io::{Error, ErrorKind};
 use std::path::{Path, PathBuf};
 
 /// Load root certificates found in the platform's native certificate store.
+///
+/// If the SSL_CERT_FILE environment variable is set, certificates (in PEM
+/// format) are read from that file instead.
 ///
 /// This function fails in a platform-specific way, expressed in a `std::io::Error`.
 ///
