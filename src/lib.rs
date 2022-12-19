@@ -74,7 +74,7 @@ fn load_certs_from_env() -> Option<Result<Vec<Certificate>, Error>> {
 }
 
 fn load_pem_certs(path: &Path) -> Result<Vec<Certificate>, Error> {
-    let f = File::open(&path)?;
+    let f = File::open(path)?;
     let mut f = BufReader::new(f);
 
     match rustls_pemfile::certs(&mut f) {
