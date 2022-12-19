@@ -1,6 +1,5 @@
 //! Print the Subject of all extracted trust anchors.
 
-use rustls_native_certs;
 use std::error::Error;
 use x509_parser::prelude::*;
 
