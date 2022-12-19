@@ -1,8 +1,8 @@
 [package]
 name = "rustls-native-certs"
 version = "0.6.2"
-edition = "2018"
-rust-version = "1.56"
+edition = "2021"
+rust-version = "1.59"
 authors = ["Joseph Birr-Pixton <jpixton@gmail.com>"]
 license = "Apache-2.0/ISC/MIT"
 readme = "README.md"
