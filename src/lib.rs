@@ -73,6 +73,22 @@ fn load_certs_from_env() -> Option<Result<Vec<Certificate>, Error>> {
     Some(load_pem_certs(&cert_var_path))
 }
 
+/// Load certificates from specific directory or file.
+pub fn load_certs_from_path(path: &Path) -> Result<Vec<Certificate>, Error> {
+    if path.is_dir() {
+        let mut certs = vec![];
+        for entry in path.read_dir()? {
+            let path = entry?.path();
+            if path.is_file() {
+                certs.extend(load_pem_certs(path.as_path())?);
+            }
+        }
+        Ok(certs)
+    } else {
+        load_pem_certs(path)
+    }
+}
+
 fn load_pem_certs(path: &Path) -> Result<Vec<Certificate>, Error> {
     let f = File::open(&path)?;
     let mut f = BufReader::new(f);
