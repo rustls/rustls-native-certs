@@ -84,7 +84,7 @@ fn load_pem_certs(path: &Path) -> Result<Vec<Certificate>, Error> {
             .collect()),
         Err(_) => Err(Error::new(
             ErrorKind::InvalidData,
-            format!("Could not load PEM file {:?}", path),
+            format!("Could not load PEM file {path:?}"),
         )),
     }
 }
