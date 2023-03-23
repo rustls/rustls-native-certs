@@ -18,7 +18,7 @@ webpki = "0.22"
 webpki-roots = "0.22"
 ring = "0.16.5"
 untrusted = "0.7.0" # stick to the version ring depends on for now
-rustls = "0.20"
+rustls = "0.21.0"
 x509-parser = "0.15"
 serial_test = "0.8" # later versions depend on dashmap, which requires a newer MSRV
 
