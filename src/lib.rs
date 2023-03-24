@@ -16,6 +16,20 @@
 //!
 //! ```no_run
 //! let mut roots = rustls::RootCertStore::empty();
+//! let root_certs = &rustls_native_certs::load_native_certs()
+//!     .expect("could not load platform certs")
+//!     .iter()
+//!     .map(|c| c.0.clone())
+//!     .collect::<Vec<Vec<u8>>>();
+//!
+//! roots.add_parsable_certificates(root_certs);
+//! ```
+//!
+//! Or, if you're certain your root store contains no potentially malformed
+//! certificates:
+//!
+//! ```no_run
+//! let mut roots = rustls::RootCertStore::empty();
 //! for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
 //!     roots
 //!         .add(&rustls::Certificate(cert.0))
