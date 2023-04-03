@@ -14,8 +14,8 @@ categories = ["network-programming", "cryptography"]
 rustls-pemfile = "1"
 
 [dev-dependencies]
-webpki = "0.22"
-webpki-roots = "0.22"
+rustls-webpki = "0.100"
+webpki-roots = "0.23"
 ring = "0.16.5"
 untrusted = "0.7.0" # stick to the version ring depends on for now
 rustls = "0.21.0"
