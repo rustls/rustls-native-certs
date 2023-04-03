@@ -14,13 +14,13 @@ categories = ["network-programming", "cryptography"]
 rustls-pemfile = "1"
 
 [dev-dependencies]
-rustls-webpki = "0.100"
-webpki-roots = "0.23"
 ring = "0.16.5"
-untrusted = "0.7.0" # stick to the version ring depends on for now
 rustls = "0.21.0"
-x509-parser = "0.15"
+rustls-webpki = "0.100"
 serial_test = "0.8" # later versions depend on dashmap, which requires a newer MSRV
+untrusted = "0.7.0" # stick to the version ring depends on for now
+webpki-roots = "0.23"
+x509-parser = "0.15"
 
 [target.'cfg(windows)'.dependencies]
 schannel = "0.1.15"
