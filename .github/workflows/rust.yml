@@ -17,7 +17,6 @@ jobs:
           - stable
           - beta
           - nightly
-          - 1.60.0
         os: [ubuntu-20.04]
         # but only stable on macos/windows (slower platforms)
         include:
@@ -61,6 +60,25 @@ jobs:
       - name: run macOS integration test
         if: matrix.os == 'macos-latest'
         run: sudo bash integration-tests/macos.sh
+
+  msrv:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, macos-latest, windows-latest]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Install MSRV toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.60"
+
+      - run: cargo check --lib --all-features
 
   format:
     name: Format
