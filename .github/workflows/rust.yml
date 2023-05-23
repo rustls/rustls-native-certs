@@ -17,7 +17,7 @@ jobs:
           - stable
           - beta
           - nightly
-          - 1.59.0
+          - 1.60.0
         os: [ubuntu-20.04]
         # but only stable on macos/windows (slower platforms)
         include:
