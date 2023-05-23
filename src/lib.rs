@@ -61,6 +61,12 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
 /// A newtype representing a single DER-encoded X.509 certificate encoded as a `Vec<u8>`.
 pub struct Certificate(pub Vec<u8>);
 
+impl AsRef<[u8]> for Certificate {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
+
 const ENV_CERT_FILE: &str = "SSL_CERT_FILE";
 
 /// Returns None if SSL_CERT_FILE is not defined in the current environment.
