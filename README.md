@@ -30,6 +30,10 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
+* 0.6.3 (2023-06-14)
+  - Bump MSRV to 1.60.
+  - Windows: avoid storing certificates which are currently invalid.
+  - Implement `AsRef<[u8]>` for `Certificate`.
 * 0.6.2 (2022-04-14):
   - Update dependencies.
 * 0.6.1 (2021-10-25):
