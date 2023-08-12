@@ -1,11 +1,10 @@
-use crate::Certificate;
-
+use pki_types::CertificateDer;
 use security_framework::trust_settings::{Domain, TrustSettings, TrustSettingsForCertificate};
 
 use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 
-pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
+pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     // The various domains are designed to interact like this:
     //
     // "Per-user Trust Settings override locally administered
@@ -50,7 +49,7 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
     for (der, trusted) in all_certs.drain() {
         use TrustSettingsForCertificate::*;
         if let TrustRoot | TrustAsRoot = trusted {
-            certs.push(Certificate(der));
+            certs.push(CertificateDer::from(der));
         }
     }
 
