@@ -52,22 +52,13 @@ fn stringify_x500name(subject: &[u8]) -> String {
     parts.join(", ")
 }
 
-fn to_map<'a>(
-    anchors: &'a [webpki::TrustAnchor<'a>],
-) -> HashMap<Vec<u8>, &'a webpki::TrustAnchor<'a>> {
-    let mut r = HashMap::new();
-
-    for anchor in anchors {
-        r.insert(anchor.spki.to_vec(), anchor);
-    }
-
-    r
-}
-
 #[test]
 fn test_does_not_have_many_roots_unknown_by_mozilla() {
     let native = rustls_native_certs::load_native_certs().unwrap();
-    let mozilla = to_map(webpki_roots::TLS_SERVER_ROOTS.0);
+    let mozilla = webpki_roots::TLS_SERVER_ROOTS
+        .iter()
+        .map(|ta| (ta.spki, ta))
+        .collect::<HashMap<_, _>>();
 
     let mut missing_in_moz_roots = 0;
 
@@ -113,7 +104,7 @@ fn test_contains_most_roots_known_by_mozilla() {
     }
 
     let mut missing_in_native_roots = 0;
-    let mozilla = webpki_roots::TLS_SERVER_ROOTS.0;
+    let mozilla = webpki_roots::TLS_SERVER_ROOTS;
     for cert in mozilla {
         if native_map.get(cert.spki).is_none() {
             println!(
