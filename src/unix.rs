@@ -1,9 +1,10 @@
 use crate::load_pem_certs;
-use crate::Certificate;
+
+use pki_types::CertificateDer;
 
 use std::io::Error;
 
-pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
+pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     let likely_locations = openssl_probe::probe();
 
     match likely_locations.cert_file {

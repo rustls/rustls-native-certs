@@ -1,4 +1,4 @@
-use crate::Certificate;
+use pki_types::CertificateDer;
 
 use std::io::Error;
 
@@ -13,14 +13,14 @@ fn usable_for_rustls(uses: schannel::cert_context::ValidUses) -> bool {
     }
 }
 
-pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
+pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     let mut certs = Vec::new();
 
     let current_user_store = schannel::cert_store::CertStore::open_current_user("ROOT")?;
 
     for cert in current_user_store.certs() {
         if usable_for_rustls(cert.valid_uses().unwrap()) && cert.is_time_valid().unwrap() {
-            certs.push(Certificate(cert.to_der().to_vec()));
+            certs.push(CertificateDer::from(cert.to_der().to_vec()));
         }
     }
 

@@ -1,13 +1,10 @@
-use std::convert::TryInto;
-use std::sync::Arc;
-
-use std::panic;
-
-use std::env;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::path::PathBuf;
+use std::sync::Arc;
+use std::{env, panic};
 
+use rustls::crypto::ring::Ring;
 // #[serial] is used on all these tests to run them sequentially. If they're run in parallel,
 // the global env var configuration in the env var test interferes with the others.
 use serial_test::serial;
@@ -15,12 +12,10 @@ use serial_test::serial;
 fn check_site(domain: &str) {
     let mut roots = rustls::RootCertStore::empty();
     for cert in rustls_native_certs::load_native_certs().unwrap() {
-        roots
-            .add(&rustls::Certificate(cert.0))
-            .unwrap();
+        roots.add(cert).unwrap();
     }
 
-    let config = rustls::ClientConfig::builder()
+    let config = rustls::ClientConfig::<Ring>::builder()
         .with_safe_defaults()
         .with_root_certificates(roots)
         .with_no_client_auth();
