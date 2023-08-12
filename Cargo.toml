@@ -16,10 +16,10 @@ rustls-pemfile = "1"
 [dev-dependencies]
 ring = "0.16.5"
 rustls = "0.21.0"
-rustls-webpki = "0.100"
+rustls-webpki = "0.101"
 serial_test = "2"
 untrusted = "0.7.0" # stick to the version ring depends on for now
-webpki-roots = "0.23"
+webpki-roots = "0.25"
 x509-parser = "0.15"
 
 [target.'cfg(windows)'.dependencies]
