@@ -18,12 +18,12 @@ ring = "0.16.5"
 rustls = "0.21.0"
 rustls-webpki = "0.101"
 serial_test = "2"
-untrusted = "0.7.0" # stick to the version ring depends on for now
+untrusted = "0.7.0"     # stick to the version ring depends on for now
 webpki-roots = "0.25"
 x509-parser = "0.15"
 
 [target.'cfg(windows)'.dependencies]
-schannel = "0.1.15"
+schannel = "0.1.22"
 
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
 openssl-probe = "0.1.2"
