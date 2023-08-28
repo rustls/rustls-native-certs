@@ -55,7 +55,15 @@ use std::path::{Path, PathBuf};
 /// and parsing a ~300KB disk file.  It's therefore prudent to call
 /// this sparingly.
 pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
-    load_certs_from_env().unwrap_or_else(platform::load_native_certs)
+    #[cfg(target_os = "wasi")]
+    return load_certs_from_env().unwrap_or_else(|| {
+        Err(Error::new(
+            ErrorKind::Other,
+            "wasi does not support SSL_CERT_FILE",
+        ))
+    });
+    #[cfg(not(target_os = "wasi"))]
+    return load_certs_from_env().unwrap_or_else(platform::load_native_certs);
 }
 
 /// A newtype representing a single DER-encoded X.509 certificate encoded as a `Vec<u8>`.
