@@ -2,15 +2,13 @@ use std::io::{stdout, Read, Write};
 use std::net::TcpStream;
 use std::sync::Arc;
 
-use rustls::crypto::ring::Ring;
-
 fn main() {
     let mut roots = rustls::RootCertStore::empty();
     for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
         roots.add(cert).unwrap();
     }
 
-    let config = rustls::ClientConfig::<Ring>::builder()
+    let config = rustls::ClientConfig::builder()
         .with_safe_defaults()
         .with_root_certificates(roots)
         .with_no_client_auth();

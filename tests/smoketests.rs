@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::{env, panic};
 
-use rustls::crypto::ring::Ring;
 // #[serial] is used on all these tests to run them sequentially. If they're run in parallel,
 // the global env var configuration in the env var test interferes with the others.
 use serial_test::serial;
@@ -15,7 +14,7 @@ fn check_site(domain: &str) {
         roots.add(cert).unwrap();
     }
 
-    let config = rustls::ClientConfig::<Ring>::builder()
+    let config = rustls::ClientConfig::builder()
         .with_safe_defaults()
         .with_root_certificates(roots)
         .with_no_client_auth();
