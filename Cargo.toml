@@ -6,8 +6,8 @@ rust-version = "1.60"
 license = "Apache-2.0 OR ISC OR MIT"
 readme = "README.md"
 description = "rustls-native-certs allows rustls to use the platform native certificate store"
-homepage = "https://github.com/ctz/rustls-native-certs"
-repository = "https://github.com/ctz/rustls-native-certs"
+homepage = "https://github.com/rustls/rustls-native-certs"
+repository = "https://github.com/rustls/rustls-native-certs"
 categories = ["network-programming", "cryptography"]
 
 [dependencies]
