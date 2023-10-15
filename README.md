@@ -1,6 +1,6 @@
-![Logo](https://raw.githubusercontent.com/ctz/rustls/main/admin/rustls-logo-web.png)
+![Logo](https://raw.githubusercontent.com/rustls/rustls/main/admin/rustls-logo-web.png)
 
-**rustls-native-certs** allows [rustls](https://github.com/ctz/rustls) to use the
+**rustls-native-certs** allows [rustls](https://github.com/rustls/rustls) to use the
 platform's native certificate store when operating as a TLS client.
 
 This is supported on Windows, macOS and Linux:
@@ -26,7 +26,7 @@ rustls-native-certs is currently in development.
 If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [![rustls](https://github.com/rustls/rustls-native-certs/actions/workflows/rust.yml/badge.svg)](https://github.com/rustls/rustls-native-certs/actions/workflows/rust.yml)
-[![Documentation](https://docs.rs/rustls-native-certs/badge.svg)](https://docs.rs/rustls-native-certs/)
+[![Documentation](https://docs.rs/rustls-native-certs/badge.svg)](https://docs.rs/rustls-native-certs)
 
 ## Release history:
 
