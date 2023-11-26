@@ -19,8 +19,13 @@ fn check_site(domain: &str) {
         .with_root_certificates(roots)
         .with_no_client_auth();
 
-    let mut conn =
-        rustls::ClientConnection::new(Arc::new(config), domain.try_into().unwrap()).unwrap();
+    let mut conn = rustls::ClientConnection::new(
+        Arc::new(config),
+        pki_types::ServerName::try_from(domain)
+            .unwrap()
+            .to_owned(),
+    )
+    .unwrap();
     let mut sock = TcpStream::connect(format!("{}:443", domain)).unwrap();
     let mut tls = rustls::Stream::new(&mut conn, &mut sock);
     tls.write_all(
