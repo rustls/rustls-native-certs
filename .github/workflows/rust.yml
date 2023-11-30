@@ -147,3 +147,18 @@ jobs:
         with:
           components: clippy
       - run: cargo clippy --locked --all-features -- --deny warnings
+
+  clippy-nightly:
+    name: Clippy (Nightly)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: clippy
+      - run: cargo clippy --locked --all-features -- --deny warnings
+
