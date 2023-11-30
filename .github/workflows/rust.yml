@@ -85,6 +85,28 @@ jobs:
 
       - run: cargo check --locked --lib --all-features
 
+  minimal-versions:
+    name: Check minimum versions of direct dependencies
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Install cargo-minimal-versions
+        uses: taiki-e/install-action@cargo-minimal-versions
+
+      # cargo-minimal-versions requires cargo-hack
+      - name: Install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+
+      - name: Check direct-minimal-versions
+        run: cargo minimal-versions --direct --ignore-private check
+
   format:
     name: Format
     runs-on: ubuntu-latest
