@@ -1,6 +1,6 @@
 [package]
 name = "rustls-native-certs"
-version = "0.7.0-alpha.2"
+version = "0.7.0-alpha.3"
 edition = "2021"
 rust-version = "1.60"
 license = "Apache-2.0 OR ISC OR MIT"
@@ -16,8 +16,8 @@ pki-types = { package = "rustls-pki-types", version = "0.2.2" }
 
 [dev-dependencies]
 ring = "0.16.5"
-rustls = "=0.22.0-alpha.5"
-rustls-webpki = "=0.102.0-alpha.7"
+rustls = "=0.22.0-alpha.6"
+rustls-webpki = "=0.102.0-alpha.8"
 serial_test = "2"
 untrusted = "0.7.0" # stick to the version ring depends on for now
 webpki-roots = "=0.26.0-alpha.2"
