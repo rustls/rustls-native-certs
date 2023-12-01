@@ -18,6 +18,9 @@
 //! }
 //! ```
 
+// Enable documentation for all features on docs.rs
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+
 #[cfg(all(unix, not(target_os = "macos")))]
 mod unix;
 #[cfg(all(unix, not(target_os = "macos")))]
