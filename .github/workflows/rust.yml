@@ -119,6 +119,23 @@ jobs:
       - name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v2
 
+  docs:
+    name: Check for documentation errors
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: cargo doc (rustls; all features)
+        run: cargo doc --locked --all-features --no-deps --document-private-items
+        env:
+          RUSTDOCFLAGS: -Dwarnings
+
   format:
     name: Format
     runs-on: ubuntu-latest
