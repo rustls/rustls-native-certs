@@ -8,9 +8,6 @@
 //! If the SSL_CERT_FILE environment variable is set, certificates (in PEM
 //! format) are read from that file instead.
 //!
-//! [`Certificate`] here is just a marker newtype that denotes a DER-encoded
-//! X.509 certificate encoded as a `Vec<u8>`.
-//!
 //! If you want to load these certificates into a `rustls::RootCertStore`,
 //! you'll likely want to do something like this:
 //!
