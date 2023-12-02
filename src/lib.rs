@@ -71,14 +71,14 @@ fn load_certs_from_env() -> Option<Result<Vec<CertificateDer<'static>>, Error>> 
 }
 
 fn load_pem_certs(path: &Path) -> Result<Vec<CertificateDer<'static>>, Error> {
-    let f = File::open(path)?;
-    let mut f = BufReader::new(f);
+    let mut f = BufReader::new(File::open(path)?);
     rustls_pemfile::certs(&mut f)
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|err| {
-            Error::new(
+        .map(|result| match result {
+            Ok(der) => Ok(der),
+            Err(err) => Err(Error::new(
                 ErrorKind::InvalidData,
                 format!("could not load PEM file {path:?}: {err}"),
-            )
+            )),
         })
+        .collect()
 }
