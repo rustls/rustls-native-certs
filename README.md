@@ -64,10 +64,10 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 This library exposes a single function with this signature:
 
 ```rust
-pub fn load_native_certs() -> Result<Vec<Certificate>, std::io::Error>
+pub fn load_native_certs() -> Result<Vec<pki_types::CertificateDer<'static>>, std::io::Error>
 ```
 
-On success, this returns a `Vec<Certificate>` loaded with a
+On success, this returns a `Vec<pki_types::CertificateDer<'static>>` loaded with a
 snapshot of the root certificates found on this platform.  This
 function fails in a platform-specific way, expressed in a `std::io::Error`.
 
