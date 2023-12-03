@@ -30,6 +30,11 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release history:
 
+* 0.7.0 (2023-12-03)
+  - Switched to using the [pki-types](https://github.com/rustls/pki-types) crate.
+    - `load_native_certs` now returns `Vec<pki_types::CertificateDer<'static>>` instead of `Vec<Certificate>`
+    - the `Certificate` newtype has been removed.
+  - Update dependencies.
 * 0.6.3 (2023-06-14)
   - Bump MSRV to 1.60.
   - Windows: avoid storing certificates which are currently invalid.
