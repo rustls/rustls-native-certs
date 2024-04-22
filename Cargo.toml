@@ -21,7 +21,7 @@ rustls-webpki = "0.102"
 serial_test = "2"
 untrusted = "0.9"
 webpki-roots = "0.26"
-x509-parser = "0.15"
+x509-parser = "0.16"
 
 [target.'cfg(windows)'.dependencies]
 schannel = "0.1.15"
