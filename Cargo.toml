@@ -24,7 +24,7 @@ webpki-roots = "0.26"
 x509-parser = "0.16"
 
 [target.'cfg(windows)'.dependencies]
-schannel = "0.1.15"
+schannel = "0.1"
 
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
 openssl-probe = "0.1.2"
