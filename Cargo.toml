@@ -16,7 +16,7 @@ pki-types = { package = "rustls-pki-types", version = "1" }
 
 [dev-dependencies]
 ring = "0.17"
-rustls = "0.22"
+rustls = "0.23"
 rustls-webpki = "0.102"
 serial_test = "3"
 untrusted = "0.9"
