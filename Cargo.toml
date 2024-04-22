@@ -16,7 +16,7 @@ pki-types = { package = "rustls-pki-types", version = "1" }
 
 [dev-dependencies]
 ring = "0.17"
-rustls = "0.22"
+rustls = "0.23"
 rustls-webpki = "0.102"
 serial_test = "3"
 untrusted = "0.9"
@@ -24,7 +24,7 @@ webpki-roots = "0.26"
 x509-parser = "0.16"
 
 [target.'cfg(windows)'.dependencies]
-schannel = "0.1.15"
+schannel = "0.1.23"
 
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
 openssl-probe = "0.1.2"
