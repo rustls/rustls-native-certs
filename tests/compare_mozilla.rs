@@ -4,10 +4,13 @@
 //! as expressed by the `webpki-roots` crate.
 //!
 //! This is, obviously, quite a heuristic test.
+mod common;
+
 use std::collections::HashMap;
 
 use pki_types::Der;
 use ring::io::der;
+use serial_test::serial;
 use webpki::anchor_from_trusted_cert;
 
 fn stringify_x500name(subject: &Der<'_>) -> String {
@@ -139,7 +142,13 @@ fn test_contains_most_roots_known_by_mozilla() {
 }
 
 #[test]
+#[serial]
 fn util_list_certs() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
+
     let native = rustls_native_certs::load_native_certs().unwrap();
 
     for (i, cert) in native.iter().enumerate() {
