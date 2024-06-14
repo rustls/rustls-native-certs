@@ -1,6 +1,8 @@
 use std::io::{ErrorKind, Read, Write};
 use std::net::TcpStream;
-use std::path::PathBuf;
+#[cfg(unix)]
+use std::os::unix::fs::symlink;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::{env, panic};
 
@@ -108,4 +110,37 @@ fn badssl_with_env() {
     );
     check_site("self-signed.badssl.com").unwrap();
     env::remove_var("SSL_CERT_FILE");
+}
+
+#[test]
+#[serial]
+fn badssl_with_dir_from_env() {
+    let temp_dir = tempfile::TempDir::new().unwrap();
+    let original = Path::new("tests/badssl-com-chain.pem")
+        .canonicalize()
+        .unwrap();
+    let link1 = temp_dir.path().join("5d30f3c5.3");
+    #[cfg(unix)]
+    let link2 = temp_dir.path().join("fd3003c5.0");
+
+    env::set_var(
+        "SSL_CERT_DIR",
+        // The CA cert, downloaded directly from the site itself:
+        temp_dir.path(),
+    );
+    assert!(check_site("self-signed.badssl.com").is_err());
+
+    // OpenSSL uses symlinks too. So, use one for testing too, if possible.
+    #[cfg(unix)]
+    symlink(original, link1).unwrap();
+    #[cfg(not(unix))]
+    std::fs::copy(original, link1).unwrap();
+
+    // Dangling symlink
+    #[cfg(unix)]
+    symlink("/a/path/which/does/not/exist/hopefully", link2).unwrap();
+
+    check_site("self-signed.badssl.com").unwrap();
+
+    env::remove_var("SSL_CERT_DIR");
 }
