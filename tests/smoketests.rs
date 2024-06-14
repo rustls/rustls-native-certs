@@ -1,3 +1,5 @@
+mod common;
+
 use std::io::{ErrorKind, Read, Write};
 use std::net::TcpStream;
 #[cfg(unix)]
@@ -63,42 +65,71 @@ fn check_site(domain: &str) -> Result<(), ()> {
 #[test]
 #[serial]
 fn google() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
     check_site("google.com").unwrap();
 }
 
 #[test]
 #[serial]
 fn amazon() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
     check_site("amazon.com").unwrap();
 }
 
 #[test]
 #[serial]
 fn facebook() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
     check_site("facebook.com").unwrap();
 }
 
 #[test]
 #[serial]
 fn netflix() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
     check_site("netflix.com").unwrap();
 }
 
 #[test]
 #[serial]
 fn ebay() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
     check_site("ebay.com").unwrap();
 }
 
 #[test]
 #[serial]
 fn apple() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
     check_site("apple.com").unwrap();
 }
 
 #[test]
 #[serial]
 fn badssl_with_env() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
+
     // Self-signed certs should never be trusted by default:
     assert!(check_site("self-signed.badssl.com").is_err());
 
@@ -109,12 +140,15 @@ fn badssl_with_env() {
         PathBuf::from("./tests/badssl-com-chain.pem"),
     );
     check_site("self-signed.badssl.com").unwrap();
-    env::remove_var("SSL_CERT_FILE");
 }
 
 #[test]
 #[serial]
 fn badssl_with_dir_from_env() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
     let temp_dir = tempfile::TempDir::new().unwrap();
     let original = Path::new("tests/badssl-com-chain.pem")
         .canonicalize()
@@ -141,6 +175,4 @@ fn badssl_with_dir_from_env() {
     symlink("/a/path/which/does/not/exist/hopefully", link2).unwrap();
 
     check_site("self-signed.badssl.com").unwrap();
-
-    env::remove_var("SSL_CERT_DIR");
 }
