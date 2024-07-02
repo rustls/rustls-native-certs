@@ -124,24 +124,11 @@ pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     platform::load_native_certs()
 }
 
-/// Returns certificates stored at SSL_CERT_FILE and/or SSL_CERT_DIR.
-///
-/// If neither is set, `None` is returned.
-///
-/// If SSL_CERT_FILE is defined, it is always used, so it must be a path to an existing,
-/// accessible file from which certificates can be loaded successfully. While parsing,
-/// [rustls_pemfile::certs()] parser will ignore parts of the file which are
-/// not considered part of a certificate. Certificates which are not in the right
-/// format (PEM) or are otherwise corrupted may get ignored silently.
-///
-/// If SSL_CERT_DIR is defined, a directory must exist at this path, and all
-/// [hash files](`is_hash_file_name()`) contained in it must be loaded successfully,
-/// subject to the rules outlined above for SSL_CERT_FILE. The directory is not
-/// scanned recursively and may be empty.
 fn load_certs_from_env() -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
     CertPaths::from_env().load()
 }
 
+/// Certificate paths from `SSL_CERT_FILE` and/or `SSL_CERT_DIR`.
 struct CertPaths {
     file: Option<PathBuf>,
     dir: Option<PathBuf>,
@@ -155,6 +142,20 @@ impl CertPaths {
         }
     }
 
+    /// Load certificates from the paths.
+    ///
+    /// If both are `None`, return `Ok(None)`.
+    ///
+    /// If `self.file` is `Some`, it is always used, so it must be a path to an existing,
+    /// accessible file from which certificates can be loaded successfully. While parsing,
+    /// the [rustls_pemfile::certs()] parser will ignore parts of the file which are
+    /// not considered part of a certificate. Certificates which are not in the right
+    /// format (PEM) or are otherwise corrupted may get ignored silently.
+    ///
+    /// If `self.dir` is defined, a directory must exist at this path, and all
+    /// [hash files](`is_hash_file_name()`) contained in it must be loaded successfully,
+    /// subject to the rules outlined above for `self.file`. The directory is not
+    /// scanned recursively and may be empty.
     fn load(&self) -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
         if self.file.is_none() && self.dir.is_none() {
             return Ok(None);
