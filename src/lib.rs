@@ -173,19 +173,6 @@ impl CertPaths {
     }
 }
 
-fn load_pem_certs(path: &Path) -> Result<Vec<CertificateDer<'static>>, Error> {
-    let mut f = BufReader::new(File::open(path)?);
-    rustls_pemfile::certs(&mut f)
-        .map(|result| match result {
-            Ok(der) => Ok(der),
-            Err(err) => Err(Error::new(
-                ErrorKind::InvalidData,
-                format!("could not load PEM file {path:?}: {err}"),
-            )),
-        })
-        .collect()
-}
-
 /// Load certificate from certificate directory (what OpenSSL calls CAdir)
 ///
 /// This directory can contain other files and directories. CAfile tends
@@ -221,6 +208,19 @@ fn load_pem_certs_from_dir(dir: &Path) -> Result<Vec<CertificateDer<'static>>, E
         }
     }
     Ok(certs)
+}
+
+fn load_pem_certs(path: &Path) -> Result<Vec<CertificateDer<'static>>, Error> {
+    let mut f = BufReader::new(File::open(path)?);
+    rustls_pemfile::certs(&mut f)
+        .map(|result| match result {
+            Ok(der) => Ok(der),
+            Err(err) => Err(Error::new(
+                ErrorKind::InvalidData,
+                format!("could not load PEM file {path:?}: {err}"),
+            )),
+        })
+        .collect()
 }
 
 /// Check if this is a hash-based file name for a certificate
