@@ -118,43 +118,45 @@ use pki_types::CertificateDer;
 ///
 /// [c_rehash]: https://www.openssl.org/docs/manmaster/man1/c_rehash.html
 pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
-    if let Some(certs) = load_certs_from_env()? {
-        return Ok(certs);
-    };
-    platform::load_native_certs()
+    match CertPaths::from_env().load()? {
+        Some(certs) => Ok(certs),
+        None => platform::load_native_certs(),
+    }
 }
 
-/// Returns certificates stored at SSL_CERT_FILE and/or SSL_CERT_DIR.
-///
-/// If neither is set, `None` is returned.
-///
-/// If SSL_CERT_FILE is defined, it is always used, so it must be a path to an existing,
-/// accessible file from which certificates can be loaded successfully. While parsing,
-/// [rustls_pemfile::certs()] parser will ignore parts of the file which are
-/// not considered part of a certificate. Certificates which are not in the right
-/// format (PEM) or are otherwise corrupted may get ignored silently.
-///
-/// If SSL_CERT_DIR is defined, a directory must exist at this path, and all
-/// [hash files](`is_hash_file_name()`) contained in it must be loaded successfully,
-/// subject to the rules outlined above for SSL_CERT_FILE. The directory is not
-/// scanned recursively and may be empty.
-fn load_certs_from_env() -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
-    let paths = CertPaths {
-        file: env::var_os(ENV_CERT_FILE).map(PathBuf::from),
-        dir: env::var_os(ENV_CERT_DIR).map(PathBuf::from),
-    };
-
-    Ok(match &paths {
-        CertPaths {
-            file: None,
-            dir: None,
-        } => None,
-        _ => Some(paths.load()?),
-    })
+/// Certificate paths from `SSL_CERT_FILE` and/or `SSL_CERT_DIR`.
+struct CertPaths {
+    file: Option<PathBuf>,
+    dir: Option<PathBuf>,
 }
 
 impl CertPaths {
-    fn load(&self) -> Result<Vec<CertificateDer<'static>>, Error> {
+    fn from_env() -> Self {
+        Self {
+            file: env::var_os(ENV_CERT_FILE).map(PathBuf::from),
+            dir: env::var_os(ENV_CERT_DIR).map(PathBuf::from),
+        }
+    }
+
+    /// Load certificates from the paths.
+    ///
+    /// If both are `None`, return `Ok(None)`.
+    ///
+    /// If `self.file` is `Some`, it is always used, so it must be a path to an existing,
+    /// accessible file from which certificates can be loaded successfully. While parsing,
+    /// the [rustls_pemfile::certs()] parser will ignore parts of the file which are
+    /// not considered part of a certificate. Certificates which are not in the right
+    /// format (PEM) or are otherwise corrupted may get ignored silently.
+    ///
+    /// If `self.dir` is defined, a directory must exist at this path, and all
+    /// [hash files](`is_hash_file_name()`) contained in it must be loaded successfully,
+    /// subject to the rules outlined above for `self.file`. The directory is not
+    /// scanned recursively and may be empty.
+    fn load(&self) -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
+        if self.file.is_none() && self.dir.is_none() {
+            return Ok(None);
+        }
+
         let mut certs = match &self.file {
             Some(cert_file) => load_pem_certs(cert_file)?,
             None => Vec::new(),
@@ -167,26 +169,8 @@ impl CertPaths {
         certs.sort_unstable_by(|a, b| a.cmp(b));
         certs.dedup();
 
-        Ok(certs)
+        Ok(Some(certs))
     }
-}
-
-struct CertPaths {
-    file: Option<PathBuf>,
-    dir: Option<PathBuf>,
-}
-
-fn load_pem_certs(path: &Path) -> Result<Vec<CertificateDer<'static>>, Error> {
-    let mut f = BufReader::new(File::open(path)?);
-    rustls_pemfile::certs(&mut f)
-        .map(|result| match result {
-            Ok(der) => Ok(der),
-            Err(err) => Err(Error::new(
-                ErrorKind::InvalidData,
-                format!("could not load PEM file {path:?}: {err}"),
-            )),
-        })
-        .collect()
 }
 
 /// Load certificate from certificate directory (what OpenSSL calls CAdir)
@@ -224,6 +208,19 @@ fn load_pem_certs_from_dir(dir: &Path) -> Result<Vec<CertificateDer<'static>>, E
         }
     }
     Ok(certs)
+}
+
+fn load_pem_certs(path: &Path) -> Result<Vec<CertificateDer<'static>>, Error> {
+    let mut f = BufReader::new(File::open(path)?);
+    rustls_pemfile::certs(&mut f)
+        .map(|result| match result {
+            Ok(der) => Ok(der),
+            Err(err) => Err(Error::new(
+                ErrorKind::InvalidData,
+                format!("could not load PEM file {path:?}: {err}"),
+            )),
+        })
+        .collect()
 }
 
 /// Check if this is a hash-based file name for a certificate
@@ -326,7 +323,7 @@ mod tests {
         }
         .load()
         .unwrap();
-        assert_eq!(certs_from_file.len(), 2);
+        assert_eq!(certs_from_file.unwrap().len(), 2);
 
         let certs_from_dir = CertPaths {
             file: None,
@@ -334,7 +331,7 @@ mod tests {
         }
         .load()
         .unwrap();
-        assert_eq!(certs_from_dir.len(), 2);
+        assert_eq!(certs_from_dir.unwrap().len(), 2);
 
         let certs_from_both = CertPaths {
             file: Some(file_path),
@@ -342,7 +339,7 @@ mod tests {
         }
         .load()
         .unwrap();
-        assert_eq!(certs_from_both.len(), 2);
+        assert_eq!(certs_from_both.unwrap().len(), 2);
     }
 
     #[test]
