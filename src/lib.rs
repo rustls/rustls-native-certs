@@ -139,21 +139,23 @@ pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
 /// subject to the rules outlined above for SSL_CERT_FILE. The directory is not
 /// scanned recursively and may be empty.
 fn load_certs_from_env() -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
-    let paths = CertPaths {
-        file: env::var_os(ENV_CERT_FILE).map(PathBuf::from),
-        dir: env::var_os(ENV_CERT_DIR).map(PathBuf::from),
-    };
-
-    Ok(match &paths {
+    Ok(match CertPaths::from_env() {
         CertPaths {
             file: None,
             dir: None,
         } => None,
-        _ => Some(paths.load()?),
+        paths => Some(paths.load()?),
     })
 }
 
 impl CertPaths {
+    fn from_env() -> Self {
+        Self {
+            file: env::var_os(ENV_CERT_FILE).map(PathBuf::from),
+            dir: env::var_os(ENV_CERT_DIR).map(PathBuf::from),
+        }
+    }
+
     fn load(&self) -> Result<Vec<CertificateDer<'static>>, Error> {
         let mut certs = match &self.file {
             Some(cert_file) => load_pem_certs(cert_file)?,
