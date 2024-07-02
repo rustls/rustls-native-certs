@@ -148,6 +148,11 @@ fn load_certs_from_env() -> Result<Option<Vec<CertificateDer<'static>>>, Error> 
     })
 }
 
+struct CertPaths {
+    file: Option<PathBuf>,
+    dir: Option<PathBuf>,
+}
+
 impl CertPaths {
     fn from_env() -> Self {
         Self {
@@ -171,11 +176,6 @@ impl CertPaths {
 
         Ok(certs)
     }
-}
-
-struct CertPaths {
-    file: Option<PathBuf>,
-    dir: Option<PathBuf>,
 }
 
 fn load_pem_certs(path: &Path) -> Result<Vec<CertificateDer<'static>>, Error> {
