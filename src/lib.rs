@@ -114,8 +114,8 @@ const ENV_CERT_FILE: &str = "SSL_CERT_FILE";
 
 /// Returns None if SSL_CERT_FILE is not defined in the current environment.
 ///
-/// If it is defined, it is always used, so it must be a path to a real
-/// file from which certificates can be loaded successfully. While parsing,
+/// If it is defined, it is always used, so it must be a path to an existing,
+/// accessible file from which certificates can be loaded successfully. While parsing,
 /// [rustls_pemfile::certs()] parser will ignore parts of the file which are
 /// not considered part of a certificate. Certificates which are not in the right
 /// format (PEM) or are otherwise corrupted may get ignored silently.
@@ -147,6 +147,23 @@ mod tests {
         // Certificate parser tries to extract certs from file ignoring
         // invalid sections.
         let certs = load_pem_certs(Path::new(file!())).unwrap();
+        assert_eq!(certs.len(), 0);
+    }
+
+    #[test]
+    fn from_env_missing_file() {
+        assert_eq!(
+            load_pem_certs(Path::new("no/such/file"))
+                .unwrap_err()
+                .kind(),
+            ErrorKind::NotFound
+        );
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn from_env_with_non_regular_and_empty_file() {
+        let certs = load_pem_certs(Path::new("/dev/null")).unwrap();
         assert_eq!(certs.len(), 0);
     }
 }
