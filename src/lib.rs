@@ -118,14 +118,10 @@ use pki_types::CertificateDer;
 ///
 /// [c_rehash]: https://www.openssl.org/docs/manmaster/man1/c_rehash.html
 pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
-    if let Some(certs) = load_certs_from_env()? {
+    if let Some(certs) = CertPaths::from_env().load()? {
         return Ok(certs);
     };
     platform::load_native_certs()
-}
-
-fn load_certs_from_env() -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
-    CertPaths::from_env().load()
 }
 
 /// Certificate paths from `SSL_CERT_FILE` and/or `SSL_CERT_DIR`.
