@@ -11,4 +11,5 @@ pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
         dir: likely_locations.cert_dir,
     }
     .load()
+    .map(|certs| certs.unwrap_or_default())
 }

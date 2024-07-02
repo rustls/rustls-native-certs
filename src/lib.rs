@@ -139,13 +139,7 @@ pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
 /// subject to the rules outlined above for SSL_CERT_FILE. The directory is not
 /// scanned recursively and may be empty.
 fn load_certs_from_env() -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
-    Ok(match CertPaths::from_env() {
-        CertPaths {
-            file: None,
-            dir: None,
-        } => None,
-        paths => Some(paths.load()?),
-    })
+    CertPaths::from_env().load()
 }
 
 struct CertPaths {
@@ -161,7 +155,11 @@ impl CertPaths {
         }
     }
 
-    fn load(&self) -> Result<Vec<CertificateDer<'static>>, Error> {
+    fn load(&self) -> Result<Option<Vec<CertificateDer<'static>>>, Error> {
+        if self.file.is_none() && self.dir.is_none() {
+            return Ok(None);
+        }
+
         let mut certs = match &self.file {
             Some(cert_file) => load_pem_certs(cert_file)?,
             None => Vec::new(),
@@ -174,7 +172,7 @@ impl CertPaths {
         certs.sort_unstable_by(|a, b| a.cmp(b));
         certs.dedup();
 
-        Ok(certs)
+        Ok(Some(certs))
     }
 }
 
@@ -328,7 +326,7 @@ mod tests {
         }
         .load()
         .unwrap();
-        assert_eq!(certs_from_file.len(), 2);
+        assert_eq!(certs_from_file.unwrap().len(), 2);
 
         let certs_from_dir = CertPaths {
             file: None,
@@ -336,7 +334,7 @@ mod tests {
         }
         .load()
         .unwrap();
-        assert_eq!(certs_from_dir.len(), 2);
+        assert_eq!(certs_from_dir.unwrap().len(), 2);
 
         let certs_from_both = CertPaths {
             file: Some(file_path),
@@ -344,7 +342,7 @@ mod tests {
         }
         .load()
         .unwrap();
-        assert_eq!(certs_from_both.len(), 2);
+        assert_eq!(certs_from_both.unwrap().len(), 2);
     }
 
     #[test]
