@@ -158,18 +158,34 @@ impl CertPaths {
         }
 
         let mut certs = match &self.file {
-            Some(cert_file) => load_pem_certs(cert_file)?,
+            Some(cert_file) => {
+                load_pem_certs(cert_file).map_err(|err| Self::load_err(cert_file, err))?
+            }
             None => Vec::new(),
         };
 
         if let Some(cert_dir) = &self.dir {
-            certs.append(&mut load_pem_certs_from_dir(cert_dir)?);
+            certs.append(
+                &mut load_pem_certs_from_dir(cert_dir)
+                    .map_err(|err| Self::load_err(cert_dir, err))?,
+            );
         }
 
         certs.sort_unstable_by(|a, b| a.cmp(b));
         certs.dedup();
 
         Ok(Some(certs))
+    }
+
+    fn load_err(path: &Path, err: Error) -> Error {
+        Error::new(
+            err.kind(),
+            format!(
+                "could not load certs from {} {}: {err}",
+                if path.is_file() { "file" } else { "dir" },
+                path.display()
+            ),
+        )
     }
 }
 
@@ -211,16 +227,7 @@ fn load_pem_certs_from_dir(dir: &Path) -> Result<Vec<CertificateDer<'static>>, E
 }
 
 fn load_pem_certs(path: &Path) -> Result<Vec<CertificateDer<'static>>, Error> {
-    let mut f = BufReader::new(File::open(path)?);
-    rustls_pemfile::certs(&mut f)
-        .map(|result| match result {
-            Ok(der) => Ok(der),
-            Err(err) => Err(Error::new(
-                ErrorKind::InvalidData,
-                format!("could not load PEM file {path:?}: {err}"),
-            )),
-        })
-        .collect()
+    rustls_pemfile::certs(&mut BufReader::new(File::open(path)?)).collect()
 }
 
 /// Check if this is a hash-based file name for a certificate
@@ -259,7 +266,11 @@ const ENV_CERT_DIR: &str = "SSL_CERT_DIR";
 mod tests {
     use super::*;
 
+    #[cfg(unix)]
+    use std::fs::Permissions;
     use std::io::Write;
+    #[cfg(unix)]
+    use std::os::unix::fs::PermissionsExt;
 
     #[test]
     fn valid_hash_file_name() {
@@ -375,5 +386,58 @@ mod tests {
     fn from_env_with_non_regular_and_empty_file() {
         let certs = load_pem_certs(Path::new("/dev/null")).unwrap();
         assert_eq!(certs.len(), 0);
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn from_env_bad_dir_perms() {
+        // Create a temp dir that we can't read from.
+        let temp_dir = tempfile::TempDir::new().unwrap();
+        fs::set_permissions(temp_dir.path(), Permissions::from_mode(0)).unwrap();
+
+        test_cert_paths_bad_perms(CertPaths {
+            file: None,
+            dir: Some(temp_dir.path().into()),
+        })
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn from_env_bad_file_perms() {
+        // Create a tmp dir with a file inside that we can't read from.
+        let temp_dir = tempfile::TempDir::new().unwrap();
+        let file_path = temp_dir.path().join("unreadable.pem");
+        let cert_file = File::create(&file_path).unwrap();
+        cert_file
+            .set_permissions(Permissions::from_mode(0))
+            .unwrap();
+
+        test_cert_paths_bad_perms(CertPaths {
+            file: Some(file_path.clone()),
+            dir: None,
+        });
+    }
+
+    #[cfg(unix)]
+    fn test_cert_paths_bad_perms(cert_paths: CertPaths) {
+        let err = cert_paths.load().unwrap_err();
+
+        let affected_path = match (cert_paths.file, cert_paths.dir) {
+            (Some(file), None) => file,
+            (None, Some(dir)) => dir,
+            _ => panic!("only one of file or dir should be set"),
+        };
+        let r#type = match affected_path.is_file() {
+            true => "file",
+            false => "dir",
+        };
+
+        assert_eq!(err.kind(), ErrorKind::PermissionDenied);
+        assert!(err
+            .to_string()
+            .contains(&format!("certs from {type}")));
+        assert!(err
+            .to_string()
+            .contains(&affected_path.display().to_string()));
     }
 }
