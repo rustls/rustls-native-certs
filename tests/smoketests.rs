@@ -64,6 +64,7 @@ fn check_site(domain: &str) -> Result<(), ()> {
 
 #[test]
 #[serial]
+#[ignore]
 fn google() {
     unsafe {
         // SAFETY: safe because of #[serial]
@@ -74,6 +75,7 @@ fn google() {
 
 #[test]
 #[serial]
+#[ignore]
 fn amazon() {
     unsafe {
         // SAFETY: safe because of #[serial]
@@ -84,6 +86,7 @@ fn amazon() {
 
 #[test]
 #[serial]
+#[ignore]
 fn facebook() {
     unsafe {
         // SAFETY: safe because of #[serial]
@@ -94,6 +97,7 @@ fn facebook() {
 
 #[test]
 #[serial]
+#[ignore]
 fn netflix() {
     unsafe {
         // SAFETY: safe because of #[serial]
@@ -104,6 +108,7 @@ fn netflix() {
 
 #[test]
 #[serial]
+#[ignore]
 fn ebay() {
     unsafe {
         // SAFETY: safe because of #[serial]
@@ -114,6 +119,7 @@ fn ebay() {
 
 #[test]
 #[serial]
+#[ignore]
 fn apple() {
     unsafe {
         // SAFETY: safe because of #[serial]
@@ -124,6 +130,7 @@ fn apple() {
 
 #[test]
 #[serial]
+#[ignore]
 fn badssl_with_env() {
     unsafe {
         // SAFETY: safe because of #[serial]
@@ -144,6 +151,7 @@ fn badssl_with_env() {
 
 #[test]
 #[serial]
+#[ignore]
 fn badssl_with_dir_from_env() {
     unsafe {
         // SAFETY: safe because of #[serial]
