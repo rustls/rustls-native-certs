@@ -184,3 +184,53 @@ fn badssl_with_dir_from_env() {
 
     check_site("self-signed.badssl.com").unwrap();
 }
+
+#[test]
+#[serial]
+#[ignore]
+#[cfg(target_os = "linux")]
+fn google_with_dir_but_broken_file() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
+
+    env::set_var("SSL_CERT_DIR", "/etc/ssl/certs");
+    env::set_var("SSL_CERT_FILE", "not-exist");
+    check_site("google.com").unwrap();
+}
+
+#[test]
+#[serial]
+#[ignore]
+#[cfg(target_os = "linux")]
+fn google_with_file_but_broken_dir() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
+
+    env::set_var("SSL_CERT_DIR", "/not-exist");
+    env::set_var("SSL_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt");
+    check_site("google.com").unwrap();
+}
+
+#[test]
+#[serial]
+#[ignore]
+#[cfg(target_os = "linux")]
+fn nothing_works_with_broken_file_and_dir() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
+
+    env::set_var("SSL_CERT_DIR", "/not-exist");
+    env::set_var("SSL_CERT_FILE", "not-exist");
+    assert_eq!(
+        rustls_native_certs::load_native_certs()
+            .unwrap_err()
+            .to_string(),
+        "could not load certs from file not-exist: No such file or directory (os error 2)"
+    );
+}
