@@ -159,7 +159,7 @@ impl CertPaths {
 
         let mut certs = match &self.file {
             Some(cert_file) => {
-                load_pem_certs(cert_file).map_err(|err| Self::load_err(cert_file, err))?
+                load_pem_certs(cert_file).map_err(|err| Self::load_err(cert_file, "file", err))?
             }
             None => Vec::new(),
         };
@@ -167,7 +167,7 @@ impl CertPaths {
         if let Some(cert_dir) = &self.dir {
             certs.append(
                 &mut load_pem_certs_from_dir(cert_dir)
-                    .map_err(|err| Self::load_err(cert_dir, err))?,
+                    .map_err(|err| Self::load_err(cert_dir, "dir", err))?,
             );
         }
 
@@ -177,14 +177,10 @@ impl CertPaths {
         Ok(Some(certs))
     }
 
-    fn load_err(path: &Path, err: Error) -> Error {
+    fn load_err(path: &Path, typ: &str, err: Error) -> Error {
         Error::new(
             err.kind(),
-            format!(
-                "could not load certs from {} {}: {err}",
-                if path.is_file() { "file" } else { "dir" },
-                path.display()
-            ),
+            format!("could not load certs from {typ} {}: {err}", path.display()),
         )
     }
 }
