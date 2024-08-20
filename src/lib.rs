@@ -157,18 +157,33 @@ impl CertPaths {
             return Ok(None);
         }
 
+        let mut first_error = None;
+
         let mut certs = match &self.file {
-            Some(cert_file) => {
-                load_pem_certs(cert_file).map_err(|err| Self::load_err(cert_file, "file", err))?
-            }
+            Some(cert_file) => match load_pem_certs(cert_file)
+                .map_err(|err| Self::load_err(cert_file, "file", err))
+            {
+                Ok(certs) => certs,
+                Err(err) => {
+                    first_error = first_error.or(Some(err));
+                    Vec::new()
+                }
+            },
             None => Vec::new(),
         };
 
         if let Some(cert_dir) = &self.dir {
-            certs.append(
-                &mut load_pem_certs_from_dir(cert_dir)
-                    .map_err(|err| Self::load_err(cert_dir, "dir", err))?,
-            );
+            match load_pem_certs_from_dir(cert_dir)
+                .map_err(|err| Self::load_err(cert_dir, "dir", err))
+            {
+                Ok(mut from_dir) => certs.append(&mut from_dir),
+                Err(err) => first_error = first_error.or(Some(err)),
+            }
+        }
+
+        // promote first error if we have no certs to return
+        if let (Some(error), []) = (first_error, certs.as_slice()) {
+            return Err(error);
         }
 
         certs.sort_unstable_by(|a, b| a.cmp(b));
