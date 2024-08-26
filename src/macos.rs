@@ -1,10 +1,11 @@
 use std::collections::HashMap;
-use std::io::{Error, ErrorKind};
 
 use pki_types::CertificateDer;
 use security_framework::trust_settings::{Domain, TrustSettings, TrustSettingsForCertificate};
 
-pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
+use super::CertificateResult;
+
+pub fn load_native_certs() -> CertificateResult {
     // The various domains are designed to interact like this:
     //
     // "Per-user Trust Settings override locally administered
@@ -16,13 +17,24 @@ pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     // overwrite existing elements, which mean User settings
     // trump Admin trump System, as desired.
 
+    let mut result = CertificateResult::default();
     let mut all_certs = HashMap::new();
-
     for domain in &[Domain::User, Domain::Admin, Domain::System] {
         let ts = TrustSettings::new(*domain);
-        let iter = ts
-            .iter()
-            .map_err(|err| Error::new(ErrorKind::Other, err))?;
+        let iter = match ts.iter() {
+            Ok(iter) => iter,
+            Err(err) => {
+                result.os_error(
+                    err.into(),
+                    match domain {
+                        Domain::User => "failed to load user trust settings",
+                        Domain::Admin => "failed to load admin trust settings",
+                        Domain::System => "failed to load system trust settings",
+                    },
+                );
+                continue;
+            }
+        };
 
         for cert in iter {
             let der = cert.to_der();
@@ -33,25 +45,28 @@ pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
             //
             // "Note that an empty Trust Settings array means "always trust this cert,
             //  with a resulting kSecTrustSettingsResult of kSecTrustSettingsResultTrustRoot".
-            let trusted = ts
-                .tls_trust_settings_for_certificate(&cert)
-                .map_err(|err| Error::new(ErrorKind::Other, err))?
-                .unwrap_or(TrustSettingsForCertificate::TrustRoot);
+            let trusted = match ts.tls_trust_settings_for_certificate(&cert) {
+                Ok(trusted) => trusted.unwrap_or(TrustSettingsForCertificate::TrustRoot),
+                Err(err) => {
+                    result.os_error(err.into(), "certificate not trusted");
+                    continue;
+                }
+            };
 
             all_certs.entry(der).or_insert(trusted);
         }
     }
-
-    let mut certs = Vec::new();
 
     // Now we have all the certificates and an idea of whether
     // to use them.
     for (der, trusted) in all_certs.drain() {
         use TrustSettingsForCertificate::*;
         if let TrustRoot | TrustAsRoot = trusted {
-            certs.push(CertificateDer::from(der));
+            result
+                .certs
+                .push(CertificateDer::from(der));
         }
     }
 
-    Ok(certs)
+    result
 }
