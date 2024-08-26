@@ -1,21 +1,28 @@
-use std::io::Error;
-
 use pki_types::CertificateDer;
 use schannel::cert_context::ValidUses;
 use schannel::cert_store::CertStore;
 
-pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
-    let mut certs = Vec::new();
+use super::CertificateResult;
 
-    let current_user_store = CertStore::open_current_user("ROOT")?;
+pub fn load_native_certs() -> CertificateResult {
+    let mut result = CertificateResult::default();
+    let current_user_store = match CertStore::open_current_user("ROOT") {
+        Ok(store) => store,
+        Err(err) => {
+            result.os_error(err.into(), "failed to open current user certificate store");
+            return result;
+        }
+    };
 
     for cert in current_user_store.certs() {
         if usable_for_rustls(cert.valid_uses().unwrap()) && cert.is_time_valid().unwrap() {
-            certs.push(CertificateDer::from(cert.to_der().to_vec()));
+            result
+                .certs
+                .push(CertificateDer::from(cert.to_der().to_vec()));
         }
     }
 
-    Ok(certs)
+    result
 }
 
 fn usable_for_rustls(uses: ValidUses) -> bool {

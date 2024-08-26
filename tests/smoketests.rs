@@ -229,7 +229,9 @@ fn nothing_works_with_broken_file_and_dir() {
     env::set_var("SSL_CERT_FILE", "not-exist");
     assert_eq!(
         rustls_native_certs::load_native_certs()
-            .unwrap_err()
+            .errors
+            .first()
+            .unwrap()
             .to_string(),
         "could not load certs from file not-exist: No such file or directory (os error 2)"
     );
