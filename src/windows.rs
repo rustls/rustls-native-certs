@@ -1,13 +1,15 @@
 use std::io::Error;
 
 use pki_types::CertificateDer;
+use schannel::cert_context::ValidUses;
+use schannel::cert_store::CertStore;
 
 static PKIX_SERVER_AUTH: &str = "1.3.6.1.5.5.7.3.1";
 
-fn usable_for_rustls(uses: schannel::cert_context::ValidUses) -> bool {
+fn usable_for_rustls(uses: ValidUses) -> bool {
     match uses {
-        schannel::cert_context::ValidUses::All => true,
-        schannel::cert_context::ValidUses::Oids(strs) => strs
+        ValidUses::All => true,
+        ValidUses::Oids(strs) => strs
             .iter()
             .any(|x| x == PKIX_SERVER_AUTH),
     }
@@ -16,7 +18,7 @@ fn usable_for_rustls(uses: schannel::cert_context::ValidUses) -> bool {
 pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     let mut certs = Vec::new();
 
-    let current_user_store = schannel::cert_store::CertStore::open_current_user("ROOT")?;
+    let current_user_store = CertStore::open_current_user("ROOT")?;
 
     for cert in current_user_store.certs() {
         if usable_for_rustls(cert.valid_uses().unwrap()) && cert.is_time_valid().unwrap() {
