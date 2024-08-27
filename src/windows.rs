@@ -1,6 +1,6 @@
-use pki_types::CertificateDer;
-
 use std::io::Error;
+
+use pki_types::CertificateDer;
 
 static PKIX_SERVER_AUTH: &str = "1.3.6.1.5.5.7.3.1";
 

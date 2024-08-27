@@ -21,6 +21,15 @@
 // Enable documentation for all features on docs.rs
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
+use std::env;
+use std::ffi::OsStr;
+use std::fs::{self, File};
+use std::io::BufReader;
+use std::io::{Error, ErrorKind};
+use std::path::{Path, PathBuf};
+
+use pki_types::CertificateDer;
+
 #[cfg(all(unix, not(target_os = "macos")))]
 mod unix;
 #[cfg(all(unix, not(target_os = "macos")))]
@@ -35,15 +44,6 @@ use windows as platform;
 mod macos;
 #[cfg(target_os = "macos")]
 use macos as platform;
-
-use std::env;
-use std::ffi::OsStr;
-use std::fs::{self, File};
-use std::io::BufReader;
-use std::io::{Error, ErrorKind};
-use std::path::{Path, PathBuf};
-
-use pki_types::CertificateDer;
 
 /// Load root certificates found in the platform's native certificate store.
 ///

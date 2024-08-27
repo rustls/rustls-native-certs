@@ -1,8 +1,8 @@
-use crate::CertPaths;
+use std::io::Error;
 
 use pki_types::CertificateDer;
 
-use std::io::Error;
+use crate::CertPaths;
 
 pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     let likely_locations = openssl_probe::probe();
