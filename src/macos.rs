@@ -1,8 +1,8 @@
-use pki_types::CertificateDer;
-use security_framework::trust_settings::{Domain, TrustSettings, TrustSettingsForCertificate};
-
 use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
+
+use pki_types::CertificateDer;
+use security_framework::trust_settings::{Domain, TrustSettings, TrustSettingsForCertificate};
 
 pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     // The various domains are designed to interact like this:
