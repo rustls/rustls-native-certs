@@ -4,17 +4,6 @@ use pki_types::CertificateDer;
 use schannel::cert_context::ValidUses;
 use schannel::cert_store::CertStore;
 
-static PKIX_SERVER_AUTH: &str = "1.3.6.1.5.5.7.3.1";
-
-fn usable_for_rustls(uses: ValidUses) -> bool {
-    match uses {
-        ValidUses::All => true,
-        ValidUses::Oids(strs) => strs
-            .iter()
-            .any(|x| x == PKIX_SERVER_AUTH),
-    }
-}
-
 pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
     let mut certs = Vec::new();
 
@@ -28,3 +17,14 @@ pub fn load_native_certs() -> Result<Vec<CertificateDer<'static>>, Error> {
 
     Ok(certs)
 }
+
+fn usable_for_rustls(uses: ValidUses) -> bool {
+    match uses {
+        ValidUses::All => true,
+        ValidUses::Oids(strs) => strs
+            .iter()
+            .any(|x| x == PKIX_SERVER_AUTH),
+    }
+}
+
+static PKIX_SERVER_AUTH: &str = "1.3.6.1.5.5.7.3.1";
