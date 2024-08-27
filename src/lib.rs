@@ -404,7 +404,7 @@ mod tests {
     fn from_env_bad_dir_perms() {
         // Create a temp dir that we can't read from.
         let temp_dir = tempfile::TempDir::new().unwrap();
-        fs::set_permissions(temp_dir.path(), Permissions::from_mode(0)).unwrap();
+        fs::set_permissions(temp_dir.path(), Permissions::from_mode(0o000)).unwrap();
 
         test_cert_paths_bad_perms(CertPaths {
             file: None,
@@ -420,7 +420,7 @@ mod tests {
         let file_path = temp_dir.path().join("unreadable.pem");
         let cert_file = File::create(&file_path).unwrap();
         cert_file
-            .set_permissions(Permissions::from_mode(0))
+            .set_permissions(Permissions::from_mode(0o000))
             .unwrap();
 
         test_cert_paths_bad_perms(CertPaths {

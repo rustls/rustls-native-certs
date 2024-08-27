@@ -167,7 +167,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - run: cargo clippy --locked --all-features -- --deny warnings
+      - run: cargo clippy --locked --all-features --all-targets -- --deny warnings
 
   clippy-nightly:
     name: Clippy (Nightly)
@@ -181,5 +181,4 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
         with:
           components: clippy
-      - run: cargo clippy --locked --all-features -- --deny warnings
-
+      - run: cargo clippy --locked --all-features --all-targets -- --deny warnings
