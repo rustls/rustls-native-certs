@@ -21,7 +21,7 @@ This is supported on Windows, macOS and Linux:
   the filename of the system CA bundle.
 
 # Status
-rustls-native-certs is currently in development.
+rustls-native-certs is mature and widely used.
 
 If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
