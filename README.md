@@ -3,6 +3,13 @@
 **rustls-native-certs** allows [rustls](https://github.com/rustls/rustls) to use the
 platform's native certificate store when operating as a TLS client.
 
+> [!IMPORTANT]
+> Instead of this crate, we suggest using [rustls-platform-verifier](https://github.com/rustls/rustls-platform-verifier),
+> which provides a more robust solution with a simpler API. This crate is still maintained,
+> but mostly for use inside the platform verifier on platforms where no other
+> solution is available. For more context, see
+> [deployment considerations](https://github.com/rustls/rustls-platform-verifier?tab=readme-ov-file#deployment-considerations).
+
 # Status
 rustls-native-certs is mature and widely used.
 
