@@ -3,23 +3,6 @@
 **rustls-native-certs** allows [rustls](https://github.com/rustls/rustls) to use the
 platform's native certificate store when operating as a TLS client.
 
-This is supported on Windows, macOS and Linux:
-
-- On all platforms, the `SSL_CERT_FILE` environment variable is checked first.
-  If that's set, certificates are loaded from the path specified by that variable,
-  or an error is returned if certificates cannot be loaded from the given path.
-  If it's not set, then the platform-specific certificate source is used.
-- On Windows, certificates are loaded from the system certificate store.
-  The [`schannel`](https://github.com/steffengy/schannel-rs) crate is used to access
-  the Windows certificate store APIs.
-- On macOS, certificates are loaded from the keychain.
-  The user, admin and system trust settings are merged together as documented
-  by Apple.  The [`security-framework`](https://github.com/kornelski/rust-security-framework)
-  crate is used to access the keystore APIs.
-- On Linux and other UNIX-like operating systems, the
-  [`openssl-probe`](https://github.com/alexcrichton/openssl-probe) crate is used to discover
-  the filename of the system CA bundle.
-
 # Status
 rustls-native-certs is mature and widely used.
 
@@ -74,6 +57,25 @@ function fails in a platform-specific way, expressed in a `std::io::Error`.
 This function can be expensive: on some platforms it involves loading
 and parsing a ~300KB disk file.  It's therefore prudent to call
 this sparingly.
+
+# Platform support
+
+This is supported on Windows, macOS and Linux:
+
+- On all platforms, the `SSL_CERT_FILE` environment variable is checked first.
+  If that's set, certificates are loaded from the path specified by that variable,
+  or an error is returned if certificates cannot be loaded from the given path.
+  If it's not set, then the platform-specific certificate source is used.
+- On Windows, certificates are loaded from the system certificate store.
+  The [`schannel`](https://github.com/steffengy/schannel-rs) crate is used to access
+  the Windows certificate store APIs.
+- On macOS, certificates are loaded from the keychain.
+  The user, admin and system trust settings are merged together as documented
+  by Apple.  The [`security-framework`](https://github.com/kornelski/rust-security-framework)
+  crate is used to access the keystore APIs.
+- On Linux and other UNIX-like operating systems, the
+  [`openssl-probe`](https://github.com/alexcrichton/openssl-probe) crate is used to discover
+  the filename of the system CA bundle.
 
 # Worked example
 
