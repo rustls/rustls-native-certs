@@ -51,3 +51,92 @@ jobs:
         run: cargo test --locked -- --ignored
         env:
           RUST_BACKTRACE: 1
+
+  smoke-tests-android:
+    name: Smoke Tests Android
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - beta
+          - nightly
+        os: [ ubuntu-latest ]
+        # Run only on the latest Android API version.
+        # All the objects and methods used to access the Android KeyStore
+        # are supported from API 1. No need to check older versions.
+        api: [ 35 ]
+        # QEMU2 only support arm64 on x86_64 hosts
+        # arch: [x86_64, arm64-v8a]
+        arch: [ x86_64 ]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+
+      - name: SetUp JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: amyu/setup-android@v4
+        with:
+          sdk-version: 35
+          build-tools-version: '35.0.0'
+          cmake-version: '3.30.5'
+          ndk-version: '28.0.12433566'
+          cache-key: 'sdk-35_tools_35.0.0_ndk-28.0.12433566_cmake-3.30.5'
+          generate-job-summary: true
+
+      - name: KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api }}-${{ matrix.arch }}
+
+      - name: ADV+Snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          working-directory: ./integration-tests/android
+          api-level: ${{ matrix.api }}
+          arch: '${{ matrix.arch }}'
+          target: 'google_apis'
+          ndk: '28.0.12433566'
+          cmake: '3.30.5'
+          emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim
+          disable-animations: true
+          force-avd-creation: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Build+Tests [${{ matrix.api }}, ${{ matrix.arch }})]
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          working-directory: ./integration-tests/android
+          api-level: ${{ matrix.api }}
+          arch: '${{ matrix.arch }}'
+          target: 'google_apis'
+          ndk: '28.0.12433566'
+          cmake: '3.30.5'
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim
+          disable-animations: true
+          force-avd-creation: false
+          script: ./gradlew -x lint build test connectedAndroidTest --stacktrace

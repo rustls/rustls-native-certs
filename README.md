@@ -67,7 +67,7 @@ this sparingly.
 
 # Platform support
 
-This is supported on Windows, macOS and Linux:
+This is supported on Windows, macOS, Android and Linux:
 
 - On all platforms, the `SSL_CERT_FILE` environment variable is checked first.
   If that's set, certificates are loaded from the path specified by that variable,
@@ -80,6 +80,9 @@ This is supported on Windows, macOS and Linux:
   The user, admin and system trust settings are merged together as documented
   by Apple.  The [`security-framework`](https://github.com/kornelski/rust-security-framework)
   crate is used to access the keystore APIs.
+- On Android, [`jni`](https://github.com/jni-rs/jni-rs) and
+  [`libloading`](https://github.com/nagisa/rust_libloading) crates are used to access
+  the keystore APIs.
 - On Linux and other UNIX-like operating systems, the
   [`openssl-probe`](https://github.com/alexcrichton/openssl-probe) crate is used to discover
   the filename of the system CA bundle.

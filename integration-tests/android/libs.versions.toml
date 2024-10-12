@@ -1,0 +1,38 @@
+[versions]
+compileSdk = "35"
+minSdk = "24"
+targetSdk = "35"
+ndk = "28.0.12433566"
+cmake = "3.30.5"
+
+android-gradle-plugin = "8.6.0-alpha07"
+kotlin = "2.0.20"
+appcompat = "1.7.0"
+annotation = "1.8.2"
+rust-android = "0.3.2"
+junit = "5.11.2"
+junit-android = "1.11.0.0"
+espresso-core = "3.6.1"
+test-core = "1.6.1"
+test-runner = "1.6.2"
+androidx-test-ext-junit = "1.2.1"
+
+[libraries]
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+annotations = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+junit = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+test-core = { module = "androidx.test:core", version.ref = "test-core" }
+test-runner = { module = "androidx.test:runner", version.ref = "test-runner" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+
+[bundles]
+test = ["junit"]
+test-instrumentation = ["junit", "test-core", "test-runner", "androidx-test-ext-junit", "espresso-core"]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+junit-android = { id = "de.mannodermaus.android-junit5", version.ref = "junit-android" }
+rust-android = { id = "io.github.MatrixDev.android-rust", version.ref = "rust-android" }

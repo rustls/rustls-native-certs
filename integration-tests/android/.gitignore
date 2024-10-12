@@ -1,0 +1,6 @@
+.gradle
+.idea
+.kotlin
+build/
+target/
+local.properties

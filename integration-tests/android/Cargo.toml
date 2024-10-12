@@ -1,0 +1,23 @@
+[package]
+name = "rustls-native-certs-android-tests"
+version = "0.0.1"
+edition = "2021"
+
+[features]
+default = []
+
+[dependencies]
+jni = { version = "0.21", default-features = false }
+rustls = { version = "0.23", default-features = false, features = ["std", "ring"] }
+rustls-native-certs = { path = "../../", default-features = false, features = [] }
+android_log-sys = { version = "0.3", default-features = false, features = [] }
+ring = "0.17"
+rustls-webpki = "0.102"
+tempfile = "3.13"
+untrusted = "0.9"
+webpki-roots = "0.26"
+x509-parser = "0.16"
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/main/rust/lib.rs"

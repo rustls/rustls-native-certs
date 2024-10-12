@@ -89,6 +89,56 @@ jobs:
 
       - run: cargo check --locked --lib --all-features
 
+  android:
+    name: Android+Build+Tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - beta
+          - nightly
+        os: [ ubuntu-latest ]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+
+      - name: Setup Android SDK
+        uses: amyu/setup-android@v4
+        with:
+          sdk-version: 35
+          build-tools-version: '35.0.0'
+          cmake-version: '3.30.5'
+          ndk-version: '28.0.12433566'
+          cache-key: 'sdk-35_tools_35.0.0_ndk-28.0.12433566_cmake-3.30.5'
+          generate-job-summary: true
+
+      - name: CargoNdk
+        working-directory: ./integration-tests/android
+        run: |
+          rustup target add \
+            aarch64-linux-android \
+            armv7-linux-androideabi \
+            x86_64-linux-android \
+            i686-linux-android
+          cargo install cargo-ndk
+
+      - name: cargo build (android; debug; default features)
+        working-directory: ./integration-tests/android
+        run: cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 -o target/ build --locked
+
+      - name: cargo build (android; debug; no default features)
+        working-directory: ./integration-tests/android
+        run: cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 -o target/ build --locked --no-default-features
+
   minimal-versions:
     name: Check minimum versions of direct dependencies
     runs-on: ubuntu-latest

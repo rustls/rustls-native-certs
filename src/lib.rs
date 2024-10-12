@@ -30,9 +30,9 @@ use std::{env, fmt};
 
 use pki_types::CertificateDer;
 
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 mod unix;
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 use unix as platform;
 
 #[cfg(windows)]
@@ -44,6 +44,11 @@ use windows as platform;
 mod macos;
 #[cfg(target_os = "macos")]
 use macos as platform;
+
+#[cfg(target_os = "android")]
+mod android;
+#[cfg(target_os = "android")]
+use android as platform;
 
 /// Load root certificates found in the platform's native certificate store.
 ///
