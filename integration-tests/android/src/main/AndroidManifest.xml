@@ -9,7 +9,7 @@
 
         <profileable android:shell="true" tools:ignore="UnusedAttribute"/>
 
-        <activity android:name="rust.android.tests.MainActivity"
+        <activity android:name="rustls.android.tests.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

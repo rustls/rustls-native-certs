@@ -1,4 +1,4 @@
-package rust.android.tests
+package rustls.android.tests
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
