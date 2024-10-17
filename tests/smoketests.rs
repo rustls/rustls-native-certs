@@ -214,7 +214,7 @@ fn google_with_dir_but_broken_file() {
 
     let first_err = res.errors.first().unwrap().to_string();
     dbg!(&first_err);
-    assert!(first_err.contains("open file"));
+    assert!(first_err.contains("from file"));
     assert!(first_err.contains("not-exist"));
 
     check_site_with_roots("google.com", res.certs).unwrap();
@@ -259,7 +259,7 @@ fn nothing_works_with_broken_file_and_dir() {
 
     let first_err = res.errors.first().unwrap().to_string();
     dbg!(&first_err);
-    assert!(first_err.contains("open file"));
+    assert!(first_err.contains("from file"));
     assert!(first_err.contains("not-exist"));
 
     let second_err = res.errors.get(1).unwrap().to_string();
