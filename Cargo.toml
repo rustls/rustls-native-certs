@@ -11,8 +11,7 @@ repository = "https://github.com/rustls/rustls-native-certs"
 categories = ["network-programming", "cryptography"]
 
 [dependencies]
-rustls-pemfile = "2"
-pki-types = { package = "rustls-pki-types", version = "1" }
+pki-types = { package = "rustls-pki-types", version = "1.10", features = ["std"] }
 
 [dev-dependencies]
 ring = "0.17"
