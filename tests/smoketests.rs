@@ -211,9 +211,12 @@ fn google_with_dir_but_broken_file() {
     env::set_var("SSL_CERT_DIR", "/etc/ssl/certs");
     env::set_var("SSL_CERT_FILE", "not-exist");
     let res = rustls_native_certs::load_native_certs();
+
     let first_err = res.errors.first().unwrap().to_string();
+    dbg!(&first_err);
     assert!(first_err.contains("open file"));
     assert!(first_err.contains("not-exist"));
+
     check_site_with_roots("google.com", res.certs).unwrap();
 }
 
@@ -230,9 +233,12 @@ fn google_with_file_but_broken_dir() {
     env::set_var("SSL_CERT_DIR", "/not-exist");
     env::set_var("SSL_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt");
     let res = rustls_native_certs::load_native_certs();
+
     let first_err = res.errors.first().unwrap().to_string();
+    dbg!(&first_err);
     assert!(first_err.contains("opening directory"));
     assert!(first_err.contains("/not-exist"));
+
     check_site_with_roots("google.com", res.certs).unwrap();
 }
 
@@ -250,10 +256,14 @@ fn nothing_works_with_broken_file_and_dir() {
     env::set_var("SSL_CERT_FILE", "not-exist");
     let res = rustls_native_certs::load_native_certs();
     assert_eq!(res.errors.len(), 2);
+
     let first_err = res.errors.first().unwrap().to_string();
+    dbg!(&first_err);
     assert!(first_err.contains("open file"));
     assert!(first_err.contains("not-exist"));
+
     let second_err = res.errors.get(1).unwrap().to_string();
+    dbg!(&second_err);
     assert!(second_err.contains("opening directory"));
     assert!(second_err.contains("/not-exist"));
 }
