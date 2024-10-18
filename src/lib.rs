@@ -343,7 +343,7 @@ impl fmt::Display for Error {
         f.write_str(": ")?;
         match &self.kind {
             ErrorKind::Io { inner, path } => {
-                write!(f, "{inner} in {}", path.display())
+                write!(f, "{inner} at '{}'", path.display())
             }
             ErrorKind::Os(err) => err.fmt(f),
         }
