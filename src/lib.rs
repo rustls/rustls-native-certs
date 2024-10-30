@@ -202,37 +202,44 @@ impl CertPaths {
 
     /// Load certificates from the paths.
     ///
-    /// If both are `None`, return `Ok(None)`.
-    ///
-    /// If `self.file` is `Some`, it is always used, so it must be a path to an existing,
-    /// accessible file from which certificates can be loaded successfully. While parsing,
-    /// the rustls-pki-types PEM parser will ignore parts of the file which are
-    /// not considered part of a certificate. Certificates which are not in the right
-    /// format (PEM) or are otherwise corrupted may get ignored silently.
-    ///
-    /// If `self.dir` is defined, a directory must exist at this path, and all
-    /// [hash files](`is_hash_file_name()`) contained in it must be loaded successfully,
-    /// subject to the rules outlined above for `self.file`. The directory is not
-    /// scanned recursively and may be empty.
+    /// See [`load_certs_from_paths()`].
     fn load(&self) -> CertificateResult {
-        let mut out = CertificateResult::default();
-        if self.file.is_none() && self.dir.is_none() {
-            return out;
-        }
-
-        if let Some(cert_file) = &self.file {
-            load_pem_certs(cert_file, &mut out);
-        }
-
-        if let Some(cert_dir) = &self.dir {
-            load_pem_certs_from_dir(cert_dir, &mut out);
-        }
-
-        out.certs
-            .sort_unstable_by(|a, b| a.cmp(b));
-        out.certs.dedup();
-        out
+        load_certs_from_paths(self.file.as_deref(), self.dir.as_deref())
     }
+}
+
+/// Load certificates from the given paths.
+///
+/// If both are `None`, returns an empty [`CertificateResult`].
+///
+/// If `file` is `Some`, it is always used, so it must be a path to an existing,
+/// accessible file from which certificates can be loaded successfully. While parsing,
+/// the rustls-pki-types PEM parser will ignore parts of the file which are
+/// not considered part of a certificate. Certificates which are not in the right
+/// format (PEM) or are otherwise corrupted may get ignored silently.
+///
+/// If `dir` is defined, a directory must exist at this path, and all
+/// hash files contained in it must be loaded successfully,
+/// subject to the rules outlined above for `file`. The directory is not
+/// scanned recursively and may be empty.
+pub fn load_certs_from_paths(file: Option<&Path>, dir: Option<&Path>) -> CertificateResult {
+    let mut out = CertificateResult::default();
+    if file.is_none() && dir.is_none() {
+        return out;
+    }
+
+    if let Some(cert_file) = file {
+        load_pem_certs(cert_file, &mut out);
+    }
+
+    if let Some(cert_dir) = dir {
+        load_pem_certs_from_dir(cert_dir, &mut out);
+    }
+
+    out.certs
+        .sort_unstable_by(|a, b| a.cmp(b));
+    out.certs.dedup();
+    out
 }
 
 /// Load certificate from certificate directory (what OpenSSL calls CAdir)
