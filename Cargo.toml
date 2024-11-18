@@ -2,7 +2,7 @@
 name = "rustls-native-certs"
 version = "0.8.0"
 edition = "2021"
-rust-version = "1.60"
+rust-version = "1.71"
 license = "Apache-2.0 OR ISC OR MIT"
 readme = "README.md"
 description = "rustls-native-certs allows rustls to use the platform native certificate store"
