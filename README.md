@@ -18,36 +18,7 @@ If you'd like to help out, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 [![rustls](https://github.com/rustls/rustls-native-certs/actions/workflows/rust.yml/badge.svg)](https://github.com/rustls/rustls-native-certs/actions/workflows/rust.yml)
 [![Documentation](https://docs.rs/rustls-native-certs/badge.svg)](https://docs.rs/rustls-native-certs)
 
-## Release history:
-
-* 0.7.0 (2023-12-03)
-  - Switched to using the [pki-types](https://github.com/rustls/pki-types) crate.
-    - `load_native_certs` now returns `Vec<pki_types::CertificateDer<'static>>` instead of `Vec<Certificate>`
-    - the `Certificate` newtype has been removed.
-  - Update dependencies.
-* 0.6.3 (2023-06-14)
-  - Bump MSRV to 1.60.
-  - Windows: avoid storing certificates which are currently invalid.
-  - Implement `AsRef<[u8]>` for `Certificate`.
-* 0.6.2 (2022-04-14):
-  - Update dependencies.
-* 0.6.1 (2021-10-25):
-  - Allow overrides using `SSL_CERT_FILE` on all platforms.
-* 0.6.0 (2021-10-24):
-  - Remove rustls dependency entirely.
-* 0.5.0 (2020-11-22):
-  - Update dependencies.
-  - Make rustls dependency optional, for use with reqwest's certificate types.  Thanks to @est31.
-* 0.4.0 (2020-07-05):
-  - Update dependencies.
-* 0.3.0 (2020-02-24):
-  - Support wider range of UNIX platforms.
-  - Update dependencies.
-* 0.2.0 (2020-01-26):
-  - Return valid certificates even in the presence of invalid ones.  This allows
-    callers to opt-in to "best effort" behaviour.
-* 0.1.0 (2019-11-04):
-  - Initial release.
+Release notes can be found [on GitHub](https://github.com/rustls/rustls-native-certs/releases).
 
 # API
 
