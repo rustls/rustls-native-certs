@@ -681,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "rustls-native-certs"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "openssl-probe",
  "ring",
