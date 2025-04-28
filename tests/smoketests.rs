@@ -51,23 +51,22 @@ fn check_site_with_roots(
             .to_owned(),
     )
     .unwrap();
-    let mut sock = TcpStream::connect(format!("{}:443", domain)).unwrap();
+    let mut sock = TcpStream::connect(format!("{domain}:443")).unwrap();
     let mut tls = rustls::Stream::new(&mut conn, &mut sock);
     let result = tls.write_all(
         format!(
             "GET / HTTP/1.1\r\n\
-                       Host: {}\r\n\
+                       Host: {domain}\r\n\
                        Connection: close\r\n\
                        Accept-Encoding: identity\r\n\
-                       \r\n",
-            domain
+                       \r\n"
         )
         .as_bytes(),
     );
     match result {
         Ok(()) => (),
         Err(e) if e.kind() == ErrorKind::InvalidData => return Err(()), // TLS error
-        Err(e) => panic!("{}", e),
+        Err(e) => panic!("{e}"),
     }
     let mut plaintext = [0u8; 1024];
     let len = tls.read(&mut plaintext).unwrap();
