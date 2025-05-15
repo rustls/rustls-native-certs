@@ -1,6 +1,6 @@
 [package]
 name = "rustls-native-certs"
-version = "0.8.1"
+version = "0.8.2"
 edition = "2021"
 rust-version = "1.71"
 license = "Apache-2.0 OR ISC OR MIT"
