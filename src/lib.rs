@@ -137,6 +137,7 @@ pub struct CertificateResult {
 
 impl CertificateResult {
     /// Return the found certificates if no error occurred, otherwise panic.
+    #[track_caller]
     pub fn expect(self, msg: &str) -> Vec<CertificateDer<'static>> {
         match self.errors.is_empty() {
             true => self.certs,
@@ -145,6 +146,7 @@ impl CertificateResult {
     }
 
     /// Return the found certificates if no error occurred, otherwise panic.
+    #[track_caller]
     pub fn unwrap(self) -> Vec<CertificateDer<'static>> {
         match self.errors.is_empty() {
             true => self.certs,
