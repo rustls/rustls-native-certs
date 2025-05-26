@@ -118,9 +118,10 @@ use macos as platform;
 /// [c_rehash]: https://www.openssl.org/docs/manmaster/man1/c_rehash.html
 pub fn load_native_certs() -> CertificateResult {
     let paths = CertPaths::from_env();
-    match (&paths.dir, &paths.file) {
-        (Some(_), _) | (_, Some(_)) => paths.load(),
-        (None, None) => platform::load_native_certs(),
+    match (&paths.dirs, &paths.file) {
+        (v, _) if !v.is_empty() => paths.load(),
+        (_, Some(_)) => paths.load(),
+        _ => platform::load_native_certs(),
     }
 }
 
@@ -189,14 +190,21 @@ impl CertificateResult {
 /// Certificate paths from `SSL_CERT_FILE` and/or `SSL_CERT_DIR`.
 struct CertPaths {
     file: Option<PathBuf>,
-    dir: Option<PathBuf>,
+    dirs: Vec<PathBuf>,
 }
 
 impl CertPaths {
     fn from_env() -> Self {
         Self {
             file: env::var_os(ENV_CERT_FILE).map(PathBuf::from),
-            dir: env::var_os(ENV_CERT_DIR).map(PathBuf::from),
+            // Read `SSL_CERT_DIR`, split it on the platform delimiter (`:` on Unix, `;` on Windows),
+            // and return the entries as `PathBuf`s.
+            //
+            // See <https://docs.openssl.org/3.5/man1/openssl-rehash/#options>
+            dirs: match env::var_os(ENV_CERT_DIR) {
+                Some(dirs) => env::split_paths(&dirs).collect(),
+                None => Vec::new(),
+            },
         }
     }
 
@@ -204,7 +212,7 @@ impl CertPaths {
     ///
     /// See [`load_certs_from_paths()`].
     fn load(&self) -> CertificateResult {
-        load_certs_from_paths(self.file.as_deref(), self.dir.as_deref())
+        load_certs_from_paths_internal(self.file.as_deref(), &self.dirs)
     }
 }
 
@@ -223,8 +231,20 @@ impl CertPaths {
 /// subject to the rules outlined above for `file`. The directory is not
 /// scanned recursively and may be empty.
 pub fn load_certs_from_paths(file: Option<&Path>, dir: Option<&Path>) -> CertificateResult {
+    let dir = match dir {
+        Some(d) => vec![d],
+        None => Vec::new(),
+    };
+
+    load_certs_from_paths_internal(file, dir.as_ref())
+}
+
+fn load_certs_from_paths_internal(
+    file: Option<&Path>,
+    dir: &[impl AsRef<Path>],
+) -> CertificateResult {
     let mut out = CertificateResult::default();
-    if file.is_none() && dir.is_none() {
+    if file.is_none() && dir.is_empty() {
         return out;
     }
 
@@ -232,8 +252,8 @@ pub fn load_certs_from_paths(file: Option<&Path>, dir: Option<&Path>) -> Certifi
         load_pem_certs(cert_file, &mut out);
     }
 
-    if let Some(cert_dir) = dir {
-        load_pem_certs_from_dir(cert_dir, &mut out);
+    for cert_dir in dir.iter() {
+        load_pem_certs_from_dir(cert_dir.as_ref(), &mut out);
     }
 
     out.certs
@@ -451,21 +471,21 @@ mod tests {
 
         let result = CertPaths {
             file: Some(file_path.clone()),
-            dir: None,
+            dirs: vec![],
         }
         .load();
         assert_eq!(result.certs.len(), 2);
 
         let result = CertPaths {
             file: None,
-            dir: Some(dir_path.clone()),
+            dirs: vec![dir_path.clone()],
         }
         .load();
         assert_eq!(result.certs.len(), 2);
 
         let result = CertPaths {
             file: Some(file_path),
-            dir: Some(dir_path),
+            dirs: vec![dir_path],
         }
         .load();
         assert_eq!(result.certs.len(), 2);
@@ -519,7 +539,7 @@ mod tests {
 
         test_cert_paths_bad_perms(CertPaths {
             file: None,
-            dir: Some(temp_dir.path().into()),
+            dirs: vec![temp_dir.path().into()],
         })
     }
 
@@ -536,7 +556,7 @@ mod tests {
 
         test_cert_paths_bad_perms(CertPaths {
             file: Some(file_path.clone()),
-            dir: None,
+            dirs: vec![],
         });
     }
 
@@ -544,7 +564,7 @@ mod tests {
     fn test_cert_paths_bad_perms(cert_paths: CertPaths) {
         let result = cert_paths.load();
 
-        if let (None, None) = (cert_paths.file, cert_paths.dir) {
+        if let (None, true) = (cert_paths.file, cert_paths.dirs.is_empty()) {
             panic!("only one of file or dir should be set");
         };
 
