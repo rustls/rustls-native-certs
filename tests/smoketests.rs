@@ -200,6 +200,39 @@ fn badssl_with_dir_from_env() {
 #[test]
 #[serial]
 #[ignore]
+fn ssl_cert_dir_multiple_paths_are_respected() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
+
+    // Create 2 temporary directories
+    let temp_dir1 = tempfile::TempDir::new().unwrap();
+    let temp_dir2 = tempfile::TempDir::new().unwrap();
+
+    // Copy the certificate to the 2nd dir, leaving the 1st one
+    // empty.
+    let original = Path::new("tests/badssl-com-chain.pem")
+        .canonicalize()
+        .unwrap();
+    let cert = temp_dir2.path().join("5d30f3c5.3");
+    std::fs::copy(original, cert).unwrap();
+
+    let list_sep = if cfg!(windows) { ';' } else { ':' };
+    let value = format!(
+        "{}{}{}",
+        temp_dir1.path().display(),
+        list_sep,
+        temp_dir2.path().display()
+    );
+
+    env::set_var("SSL_CERT_DIR", value);
+    check_site("self-signed.badssl.com").unwrap();
+}
+
+#[test]
+#[serial]
+#[ignore]
 #[cfg(target_os = "linux")]
 fn google_with_dir_but_broken_file() {
     unsafe {
