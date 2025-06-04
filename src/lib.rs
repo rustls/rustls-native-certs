@@ -22,7 +22,6 @@
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 use std::error::Error as StdError;
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::{env, fmt, fs, io};
 
@@ -51,7 +50,7 @@ use macos as platform;
 /// | Env. Var.      | Description                                                                           |
 /// |----------------|---------------------------------------------------------------------------------------|
 /// | SSL_CERT_FILE  | File containing an arbitrary number of certificates in PEM format.                    |
-/// | SSL_CERT_DIR   | Directory utilizing the hierarchy and naming convention used by OpenSSL's [c_rehash]. |
+/// | SSL_CERT_DIR   | Colon separated list of directories containing certificate files.                     |
 ///
 /// If **either** (or **both**) are set, certificates are only loaded from
 /// the locations specified via environment variables and not the platform-
@@ -226,10 +225,9 @@ impl CertPaths {
 /// not considered part of a certificate. Certificates which are not in the right
 /// format (PEM) or are otherwise corrupted may get ignored silently.
 ///
-/// If `dir` is defined, a directory must exist at this path, and all
-/// hash files contained in it must be loaded successfully,
-/// subject to the rules outlined above for `file`. The directory is not
-/// scanned recursively and may be empty.
+/// If `dir` is defined, a directory must exist at this path, and all files
+/// contained in it must be loaded successfully, subject to the rules outlined above for `file`.
+/// The directory is not scanned recursively and may be empty.
 pub fn load_certs_from_paths(file: Option<&Path>, dir: Option<&Path>) -> CertificateResult {
     let dir = match dir {
         Some(d) => vec![d],
@@ -263,12 +261,6 @@ fn load_certs_from_paths_internal(
 }
 
 /// Load certificate from certificate directory (what OpenSSL calls CAdir)
-///
-/// This directory can contain other files and directories. CAfile tends
-/// to be in here too. To avoid loading something twice or something that
-/// isn't a valid certificate, we limit ourselves to loading those files
-/// that have a hash-based file name matching the pattern used by OpenSSL.
-/// The hash is not verified, however.
 fn load_pem_certs_from_dir(dir: &Path, out: &mut CertificateResult) {
     let dir_reader = match fs::read_dir(dir) {
         Ok(reader) => reader,
@@ -288,12 +280,6 @@ fn load_pem_certs_from_dir(dir: &Path, out: &mut CertificateResult) {
         };
 
         let path = entry.path();
-        let file_name = path
-            .file_name()
-            // We are looping over directory entries. Directory entries
-            // always have a name (except "." and ".." which the iterator
-            // never yields).
-            .expect("dir entry with no name");
 
         // `openssl rehash` used to create this directory uses symlinks. So,
         // make sure we resolve them.
@@ -309,7 +295,7 @@ fn load_pem_certs_from_dir(dir: &Path, out: &mut CertificateResult) {
             }
         };
 
-        if metadata.is_file() && is_hash_file_name(file_name) {
+        if metadata.is_file() {
             load_pem_certs(&path, out);
         }
     }
@@ -330,35 +316,6 @@ fn load_pem_certs(path: &Path, out: &mut CertificateResult) {
             Err(err) => out.pem_error(err, path),
         }
     }
-}
-
-/// Check if this is a hash-based file name for a certificate
-///
-/// According to the [c_rehash man page][]:
-///
-/// > The links created are of the form HHHHHHHH.D, where each H is a hexadecimal
-/// > character and D is a single decimal digit.
-///
-/// `c_rehash` generates lower-case hex digits but this is not clearly documented.
-/// Because of this, and because it could lead to issues on case-insensitive file
-/// systems, upper-case hex digits are accepted too.
-///
-/// [c_rehash man page]: https://www.openssl.org/docs/manmaster/man1/c_rehash.html
-fn is_hash_file_name(file_name: &OsStr) -> bool {
-    let file_name = match file_name.to_str() {
-        Some(file_name) => file_name,
-        None => return false, // non-UTF8 can't be hex digits
-    };
-
-    if file_name.len() != 10 {
-        return false;
-    }
-    let mut iter = file_name.chars();
-    let iter = iter.by_ref();
-    iter.take(8)
-        .all(|c| c.is_ascii_hexdigit())
-        && iter.next() == Some('.')
-        && matches!(iter.next(), Some(c) if c.is_ascii_digit())
 }
 
 #[derive(Debug)]
@@ -412,34 +369,6 @@ mod tests {
     use std::io::Write;
     #[cfg(unix)]
     use std::os::unix::fs::PermissionsExt;
-
-    #[test]
-    fn valid_hash_file_name() {
-        let valid_names = [
-            "f3377b1b.0",
-            "e73d606e.1",
-            "01234567.2",
-            "89abcdef.3",
-            "ABCDEF00.9",
-        ];
-        for name in valid_names {
-            assert!(is_hash_file_name(OsStr::new(name)));
-        }
-    }
-
-    #[test]
-    fn invalid_hash_file_name() {
-        let valid_names = [
-            "f3377b1b.a",
-            "e73d606g.1",
-            "0123457.2",
-            "89abcdef0.3",
-            "name.pem",
-        ];
-        for name in valid_names {
-            assert!(!is_hash_file_name(OsStr::new(name)));
-        }
-    }
 
     #[test]
     fn deduplication() {
