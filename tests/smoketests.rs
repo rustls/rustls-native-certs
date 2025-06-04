@@ -233,6 +233,34 @@ fn ssl_cert_dir_multiple_paths_are_respected() {
 #[test]
 #[serial]
 #[ignore]
+fn ssl_cert_dir_non_hash_based_name() {
+    unsafe {
+        // SAFETY: safe because of #[serial]
+        common::clear_env();
+    }
+
+    // Create temporary directory
+    let temp_dir = tempfile::TempDir::new().unwrap();
+
+    // Copy the certificate to the dir
+    let original = Path::new("tests/badssl-com-chain.pem")
+        .canonicalize()
+        .unwrap();
+    let cert = temp_dir.path().join("test.pem");
+    std::fs::copy(original, cert).unwrap();
+
+    env::set_var(
+        "SSL_CERT_DIR",
+        // The CA cert, downloaded directly from the site itself:
+        temp_dir.path(),
+    );
+
+    check_site("self-signed.badssl.com").unwrap();
+}
+
+#[test]
+#[serial]
+#[ignore]
 #[cfg(target_os = "linux")]
 fn google_with_dir_but_broken_file() {
     unsafe {
