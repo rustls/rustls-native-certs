@@ -6,8 +6,10 @@ ANY_CA_PEM=integration-tests/one-existing-ca.pem
 ANY_CA_SUBJECT="OU=GlobalSign Root CA - R3, O=GlobalSign, CN=GlobalSign"
 
 reset() {
-  security remove-trusted-cert -d $ANY_CA_PEM || true
-  list | grep "$ANY_CA_SUBJECT"
+  printf "\n*** Remove test CA ***\n"
+  CERT_HASH=$(openssl x509 -in $ANY_CA_PEM -noout -fingerprint -sha1 | cut -d= -f2 | tr -d :)
+  security delete-certificate -Z "$CERT_HASH" /Library/Keychains/System.keychain || true
+  assert_missing "$ANY_CA_SUBJECT"
 }
 
 list() {
@@ -28,12 +30,14 @@ assert_exists() {
 
 test_distrust_existing_root() {
   assert_exists "$ANY_CA_SUBJECT"
+  printf "\n*** Add test CA ***\n"
   security add-trusted-cert -d -r deny $ANY_CA_PEM
   assert_missing "$ANY_CA_SUBJECT"
   reset
 }
 
 # https://developer.apple.com/forums/thread/671582?answerId=693632022#693632022
+printf "\n*** Enable trust settings ***\n"
 security authorizationdb write com.apple.trust-settings.admin allow
 
 reset
