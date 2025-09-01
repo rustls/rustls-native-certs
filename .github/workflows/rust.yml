@@ -69,9 +69,10 @@ jobs:
       - name: cargo test (release; no run)
         run: cargo test --locked --release --no-run
 
-      - name: run macOS integration test
-        if: matrix.os == 'macos-latest'
-        run: sudo bash integration-tests/macos.sh
+      # https://github.com/rustls/rustls-native-certs/issues/179
+      # - name: run macOS integration test
+      #  if: matrix.os == 'macos-latest'
+      #  run: sudo bash integration-tests/macos.sh
 
   msrv:
     runs-on: ${{ matrix.os }}
