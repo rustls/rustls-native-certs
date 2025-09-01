@@ -21,7 +21,7 @@ serial_test = "3"
 tempfile = "3.5"
 untrusted = "0.9"
 webpki-roots = "1"
-x509-parser = "0.17"
+x509-parser = "0.18"
 
 [target.'cfg(windows)'.dependencies]
 schannel = "0.1"
