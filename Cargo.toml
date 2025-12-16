@@ -9,6 +9,7 @@ description = "rustls-native-certs allows rustls to use the platform native cert
 homepage = "https://github.com/rustls/rustls-native-certs"
 repository = "https://github.com/rustls/rustls-native-certs"
 categories = ["network-programming", "cryptography"]
+include = ["Cargo.toml", "LICENSE", "LICENSE-APACHE", "LICENSE-MIT", "LICENSE-ISC", "README.md", "src/**/*.rs"]
 
 [dependencies]
 pki-types = { package = "rustls-pki-types", version = "1.10", features = ["std"] }
