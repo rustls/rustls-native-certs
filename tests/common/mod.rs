@@ -1,6 +1,6 @@
 use std::env;
 
-/// Cargo, at least sometimes, sets SSL_CERT_FILE and SSL_CERT_DIR internally,
+/// Cargo, at least sometimes, sets SSL_CERT_FILE and SSL_CERT_DIR internally, as
 /// it uses OpenSSL. So, always unset both at the beginning of a test even if
 /// the test doesn't use either.
 ///

@@ -47,10 +47,10 @@ use macos as platform;
 ///
 /// ## Environment Variables
 ///
-/// | Env. Var.      | Description                                                                           |
-/// |----------------|---------------------------------------------------------------------------------------|
-/// | SSL_CERT_FILE  | File containing an arbitrary number of certificates in PEM format.                    |
-/// | SSL_CERT_DIR   | Colon separated list of directories containing certificate files.                     |
+/// | Env. Var.     | Description                                                                           |
+/// |---------------|---------------------------------------------------------------------------------------|
+/// | SSL_CERT_FILE | File containing an arbitrary number of certificates in PEM format.                    |
+/// | SSL_CERT_DIR  | Colon separated list of directories containing certificate files.                     |
 ///
 /// If **either** (or **both**) are set, certificates are only loaded from
 /// the locations specified via environment variables and not the platform-
