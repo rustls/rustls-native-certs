@@ -142,7 +142,7 @@ jobs:
       - name: cargo doc (rustls; all features)
         run: cargo doc --locked --all-features --no-deps --document-private-items
         env:
-          RUSTDOCFLAGS: -Dwarnings
+          RUSTDOCFLAGS: -Dwarnings --cfg=rustls_native_certs_docsrs
 
   format:
     name: Format
