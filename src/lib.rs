@@ -19,7 +19,7 @@
 //! ```
 
 // Enable documentation for all features on docs.rs
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(rustls_native_certs_docsrs, feature(doc_cfg))]
 
 use std::error::Error as StdError;
 use std::path::{Path, PathBuf};

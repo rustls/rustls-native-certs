@@ -32,3 +32,9 @@ openssl-probe = "0.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 security-framework = "3"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [ 'cfg(rustls_native_certs_docsrs)' ] }
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "rustls_native_certs_docsrs"]
