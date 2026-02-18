@@ -485,10 +485,21 @@ mod tests {
             .set_permissions(Permissions::from_mode(0o000))
             .unwrap();
 
-        test_cert_paths_bad_perms(CertPaths {
+        // Permission denied.
+        let load_from_file = CertPaths {
             file: Some(file_path.clone()),
             dirs: vec![],
-        });
+        };
+        test_cert_paths_bad_perms(load_from_file);
+
+        // No permission denied; files without read permission in directory are skipped.
+        let load_from_dir = CertPaths {
+            file: None,
+            dirs: vec![temp_dir.path().to_owned()],
+        };
+        let result = load_from_dir.load();
+        assert_eq!(result.certs.len(), 0);
+        assert!(result.errors.is_empty()); // FIXME
     }
 
     #[cfg(unix)]
