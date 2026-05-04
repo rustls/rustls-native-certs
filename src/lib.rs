@@ -384,20 +384,20 @@ mod tests {
 
         {
             let mut file = File::create(&file_path).unwrap();
-            write!(file, "{}", &cert1).unwrap();
-            write!(file, "{}", &cert2).unwrap();
+            write!(file, "{}", cert1).unwrap();
+            write!(file, "{}", cert2).unwrap();
         }
 
         {
             // Duplicate (already in `file_path`)
             let mut file = File::create(dir_path.join("71f3bb26.0")).unwrap();
-            write!(file, "{}", &cert1).unwrap();
+            write!(file, "{}", cert1).unwrap();
         }
 
         {
             // Duplicate (already in `file_path`)
             let mut file = File::create(dir_path.join("912e7cd5.0")).unwrap();
-            write!(file, "{}", &cert2).unwrap();
+            write!(file, "{}", cert2).unwrap();
         }
 
         let result = CertPaths {
