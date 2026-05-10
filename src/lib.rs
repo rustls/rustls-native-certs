@@ -249,7 +249,8 @@ fn load_certs_from_paths_internal(
     }
 
     if let Some(cert_file) = file {
-        load_pem_certs(cert_file, &mut out);
+        let skip_eperm = false;
+        load_pem_certs(cert_file, &mut out, skip_eperm);
     }
 
     for cert_dir in dir.iter() {
@@ -298,15 +299,25 @@ fn load_pem_certs_from_dir(dir: &Path, out: &mut CertificateResult) {
         };
 
         if metadata.is_file() {
-            load_pem_certs(&path, out);
+            let skip_eperm = true;
+            load_pem_certs(&path, out, skip_eperm);
         }
     }
 }
 
-fn load_pem_certs(path: &Path, out: &mut CertificateResult) {
+fn load_pem_certs(path: &Path, out: &mut CertificateResult, skip_eperm: bool) {
     let iter = match CertificateDer::pem_file_iter(path) {
         Ok(iter) => iter,
         Err(err) => {
+            if skip_eperm {
+                // When loading from directory, skip over files that are not
+                // readable. Usually because they are `chown root` or `chmod -r`.
+                if let pem::Error::Io(io_error) = &err {
+                    if io_error.kind() == io::ErrorKind::PermissionDenied {
+                        return;
+                    }
+                }
+            }
             out.pem_error(err, path);
             return;
         }
@@ -427,7 +438,7 @@ mod tests {
         // Certificate parser tries to extract certs from file ignoring
         // invalid sections.
         let mut result = CertificateResult::default();
-        load_pem_certs(Path::new(file!()), &mut result);
+        load_pem_certs(Path::new(file!()), &mut result, false);
         assert_eq!(result.certs.len(), 0);
         assert!(result.errors.is_empty());
     }
@@ -435,7 +446,7 @@ mod tests {
     #[test]
     fn from_env_missing_file() {
         let mut result = CertificateResult::default();
-        load_pem_certs(Path::new("no/such/file"), &mut result);
+        load_pem_certs(Path::new("no/such/file"), &mut result, false);
         match &first_error(&result).kind {
             ErrorKind::Io { inner, .. } => assert_eq!(inner.kind(), io::ErrorKind::NotFound),
             _ => panic!("unexpected error {:?}", result.errors),
@@ -456,7 +467,7 @@ mod tests {
     #[cfg(unix)]
     fn from_env_with_non_regular_and_empty_file() {
         let mut result = CertificateResult::default();
-        load_pem_certs(Path::new("/dev/null"), &mut result);
+        load_pem_certs(Path::new("/dev/null"), &mut result, false);
         assert_eq!(result.certs.len(), 0);
         assert!(result.errors.is_empty());
     }
@@ -485,10 +496,21 @@ mod tests {
             .set_permissions(Permissions::from_mode(0o000))
             .unwrap();
 
-        test_cert_paths_bad_perms(CertPaths {
+        // Permission denied.
+        let load_from_file = CertPaths {
             file: Some(file_path.clone()),
             dirs: vec![],
-        });
+        };
+        test_cert_paths_bad_perms(load_from_file);
+
+        // No permission denied; files without read permission in directory are skipped.
+        let load_from_dir = CertPaths {
+            file: None,
+            dirs: vec![temp_dir.path().to_owned()],
+        };
+        let result = load_from_dir.load();
+        assert_eq!(result.certs.len(), 0);
+        assert!(result.errors.is_empty()); // FIXME
     }
 
     #[cfg(unix)]
