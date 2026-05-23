@@ -32,7 +32,7 @@ This returns a `CertificateResult` which contains `certs: Vec<CertificateDer<'st
 snapshot of the root certificates found on this platform along with any platform-specific errors.
 
 This function can be expensive: on some platforms it involves loading
-and parsing a ~300KB disk file.  It's therefore prudent to call
+and parsing a ~300KB disk file. It's therefore prudent to call
 this sparingly.
 
 # Platform support
@@ -48,7 +48,7 @@ This is supported on Windows, macOS and Linux:
   the Windows certificate store APIs.
 - On macOS, certificates are loaded from the keychain.
   The user, admin and system trust settings are merged together as documented
-  by Apple.  The [`security-framework`](https://github.com/kornelski/rust-security-framework)
+  by Apple. The [`security-framework`](https://github.com/kornelski/rust-security-framework)
   crate is used to access the keystore APIs.
 - On Linux and other UNIX-like operating systems, the
   [`openssl-probe`](https://github.com/alexcrichton/openssl-probe) crate is used to discover
@@ -67,5 +67,5 @@ rustls-native-certs is distributed under the following three licenses:
 - ISC license.
 
 These are included as LICENSE-APACHE, LICENSE-MIT and LICENSE-ISC
-respectively.  You may use this software under the terms of any
+respectively. You may use this software under the terms of any
 of these licenses, at your option.

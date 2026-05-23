@@ -50,7 +50,7 @@ use macos as platform;
 /// | Env. Var.     | Description                                                                           |
 /// |---------------|---------------------------------------------------------------------------------------|
 /// | SSL_CERT_FILE | File containing an arbitrary number of certificates in PEM format.                    |
-/// | SSL_CERT_DIR  | Colon separated list of directories containing certificate files.                     |
+/// | SSL_CERT_DIR  | Colon-separated list of directories containing certificate files.                     |
 ///
 /// If **either** (or **both**) are set, certificates are only loaded from
 /// the locations specified via environment variables and not the platform-
@@ -111,7 +111,7 @@ use macos as platform;
 /// ## Caveats
 ///
 /// This function can be expensive: on some platforms it involves loading
-/// and parsing a ~300KB disk file.  It's therefore prudent to call
+/// and parsing a ~300KB disk file. It's therefore prudent to call
 /// this sparingly.
 ///
 /// [c_rehash]: https://www.openssl.org/docs/manmaster/man1/c_rehash.html
@@ -262,7 +262,7 @@ fn load_certs_from_paths_internal(
     out
 }
 
-/// Load certificate from certificate directory (what OpenSSL calls CAdir)
+/// Load certificates from a certificate directory (what OpenSSL calls CAdir)
 fn load_pem_certs_from_dir(dir: &Path, out: &mut CertificateResult) {
     let dir_reader = match fs::read_dir(dir) {
         Ok(reader) => reader,
@@ -283,7 +283,7 @@ fn load_pem_certs_from_dir(dir: &Path, out: &mut CertificateResult) {
 
         let path = entry.path();
 
-        // `openssl rehash` used to create this directory uses symlinks. So,
+        // The `openssl rehash` command used to create this directory uses symlinks. So,
         // make sure we resolve them.
         let metadata = match fs::metadata(&path) {
             Ok(metadata) => metadata,
@@ -424,7 +424,7 @@ mod tests {
 
     #[test]
     fn malformed_file_from_env() {
-        // Certificate parser tries to extract certs from file ignoring
+        // The certificate parser tries to extract certs from the file, ignoring
         // invalid sections.
         let mut result = CertificateResult::default();
         load_pem_certs(Path::new(file!()), &mut result);
@@ -477,7 +477,7 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn from_env_bad_file_perms() {
-        // Create a tmp dir with a file inside that we can't read from.
+        // Create a temp dir with a file inside that we can't read from.
         let temp_dir = tempfile::TempDir::new().unwrap();
         let file_path = temp_dir.path().join("unreadable.pem");
         let cert_file = File::create(&file_path).unwrap();
