@@ -203,7 +203,9 @@ impl CertPaths {
             //
             // See <https://docs.openssl.org/3.5/man1/openssl-rehash/#options>
             dirs: match env::var_os(ENV_CERT_DIR) {
-                Some(dirs) => env::split_paths(&dirs).collect(),
+                Some(dirs) => env::split_paths(&dirs)
+                    .filter(|p| !p.as_os_str().is_empty())
+                    .collect(),
                 None => Vec::new(),
             },
         }
