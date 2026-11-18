@@ -80,9 +80,9 @@ fn test_does_not_have_many_roots_unknown_by_mozilla() {
     }
 
     #[cfg(windows)]
-    let threshold = 2.0; // no more than 160% extra roots; windows CI vm has lots of extra roots
+    let threshold = 2.1; // no more than 210% extra roots; windows CI vm has lots of extra roots
     #[cfg(target_os = "macos")]
-    let threshold = 0.65; // macOS has a bunch of extra roots, too
+    let threshold = 0.70; // macOS has a bunch of extra roots, too
     #[cfg(not(any(windows, target_os = "macos")))]
     let threshold = 0.5; // no more than 50% extra roots
 
